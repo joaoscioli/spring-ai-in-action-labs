@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.boardgamebuddy.SpringAiBoardGameServiceWireMockTests" tests="1" skipped="0" failures="1" errors="0" timestamp="2025-11-14T16:54:30.424Z" hostname="SCIOLI" time="0.425">
+  <properties/>
+  <testcase name="testAskQuestion()" classname="com.example.boardgamebuddy.SpringAiBoardGameServiceWireMockTests" time="0.425">
+    <failure message="java.io.FileNotFoundException: class path resource [test-openai-response.json] cannot be opened because it does not exist" type="java.io.FileNotFoundException">java.io.FileNotFoundException: class path resource [test-openai-response.json] cannot be opened because it does not exist
+	at org.springframework.core.io.ClassPathResource.getInputStream(ClassPathResource.java:215)
+	at org.springframework.core.io.Resource.getContentAsString(Resource.java:166)
+	at com.example.boardgamebuddy.SpringAiBoardGameServiceWireMockTests.setup(SpringAiBoardGameServiceWireMockTests.java:36)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+</failure>
+  </testcase>
+  <system-out><![CDATA[13:54:28.124 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.boardgamebuddy.SpringAiBoardGameServiceWireMockTests]: SpringAiBoardGameServiceWireMockTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+13:54:28.239 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.boardgamebuddy.BoardGameBuddyApplication for test class com.example.boardgamebuddy.SpringAiBoardGameServiceWireMockTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+2025-11-14T13:54:28.525-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.wiremock.spring.internal.Store       : Resolving store from context: board-game-buddy
+2025-11-14T13:54:28.540-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory wiremock\wiremock... 
+2025-11-14T13:54:28.541-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory stubs\wiremock... 
+2025-11-14T13:54:28.541-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory mappings\wiremock... 
+2025-11-14T13:54:28.541-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory wiremock... 
+2025-11-14T13:54:28.541-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory stubs... 
+2025-11-14T13:54:28.541-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Looking for mocks in directory mappings... 
+2025-11-14T13:54:28.542-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : No mocks found under directory
+2025-11-14T13:54:28.543-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : No mocks found under classpath
+2025-11-14T13:54:28.544-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Configuring WireMockServer with name 'wiremock' on HTTP port: 0 and HTTPS port: -1
+2025-11-14T13:54:29.107-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] WireMock.wiremock                        : Using HTTP server impl: Jetty12HttpServer
+2025-11-14T13:54:29.113-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.eclipse.jetty.server.Server          : jetty-12.0.29; built: 2025-10-16T15:15:43.982Z; git: 8dbd9865cc7407d735084a181cc3f21205872b70; jvm 17.0.9+9
+2025-11-14T13:54:29.125-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.jetty.server.handler.ContextHandler  : Started oeje10s.ServletContextHandler@55fdf7f9{/__admin,/__admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@4091b9c3{STARTED}}
+2025-11-14T13:54:29.127-03:00  WARN 33184 --- [board-game-buddy] [    Test worker] o.eclipse.jetty.util.DeprecationWarning  : Using @Deprecated Class org.eclipse.jetty.ee10.servlets.CrossOriginFilter
+2025-11-14T13:54:29.129-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.j.e.servlet.ServletContextHandler    : Started oeje10s.ServletContextHandler@55fdf7f9{/__admin,/__admin,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@4091b9c3{STARTED}}
+2025-11-14T13:54:29.130-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.jetty.server.handler.ContextHandler  : Started oeje10s.ServletContextHandler@38d08cb5{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@363c32cc{STARTED}}
+2025-11-14T13:54:29.134-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.j.s.handler.ContextHandler.ROOT      : RequestHandlerClass from context returned com.github.tomakehurst.wiremock.http.StubRequestHandler. Normalized mapped under returned 'null'
+2025-11-14T13:54:29.134-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.j.e.servlet.ServletContextHandler    : Started oeje10s.ServletContextHandler@38d08cb5{ROOT,/,b=null,a=AVAILABLE,h=oeje10s.ServletHandler@363c32cc{STARTED}}
+2025-11-14T13:54:29.140-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.e.jetty.server.AbstractConnector       : Started NetworkTrafficServerConnector@66223d94{HTTP/1.1, (http/1.1, h2c)}{0.0.0.0:32808}
+2025-11-14T13:54:29.146-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.eclipse.jetty.server.Server          : Started oejs.Server@23cbbd07{STARTING}[12.0.29,sto=1000] @1683ms
+2025-11-14T13:54:29.146-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Started WireMockServer with name 'wiremock':http://localhost:32808
+2025-11-14T13:54:29.146-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.wiremock.spring.internal.Store       : Resolving store from context: board-game-buddy
+2025-11-14T13:54:29.147-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Adding property 'openai.base.url=http://localhost:32808' with HTTP base URL to Spring application context
+2025-11-14T13:54:29.151-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] c.w.s.i.WireMockServerCreator wiremock   : Adding property 'wiremock.server.port=32808' with HTTP port to Spring application context
+2025-11-14T13:54:29.163-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] .b.SpringAiBoardGameServiceWireMockTests : Starting SpringAiBoardGameServiceWireMockTests using Java 17.0.9 with PID 33184 (started by joaos in C:\Users\joaos\IdeaProjects\spring-ai-in-action-labs\board-game-buddy)
+2025-11-14T13:54:29.164-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] .b.SpringAiBoardGameServiceWireMockTests : No active profile set, falling back to 1 default profile: "default"
+2025-11-14T13:54:30.408-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] .b.SpringAiBoardGameServiceWireMockTests : Started SpringAiBoardGameServiceWireMockTests in 2.064 seconds (process running for 2.945)
+2025-11-14T13:54:30.427-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.wiremock.spring.internal.Store       : Resolving store from context: board-game-buddy
+2025-11-14T13:54:30.428-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] org.wiremock.spring.internal.Store       : Resolving store from context: board-game-buddy
+2025-11-14T13:54:30.429-03:00  INFO 33184 --- [board-game-buddy] [    Test worker] o.w.s.i.WireMockSpringJunitExtension     : Configuring WireMock for default instance, 'wiremock' on '32808'.
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
