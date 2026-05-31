@@ -2,6 +2,21 @@
 
 > Exploring the power of AI within the Spring ecosystem — inspired by *Spring AI in Action* by Craig Walls (Foreword by Rod Johnson).
 
+## Portfolio Positioning
+
+This repository is maintained as an emerging-technology lab for Java and Spring
+AI. Its role in my portfolio is to show curiosity, applied research, and the
+ability to evaluate new backend capabilities without losing focus on solid
+engineering fundamentals.
+
+It is intentionally positioned as an experimental lab. Production-oriented
+backend competence is demonstrated in curated projects with clear architecture,
+tests, documentation, CI/CD, observability, and reproducible setup.
+
+**Repository type:** Spring AI research lab  
+**Primary focus:** Java, Spring Boot, Spring AI, LLM integration  
+**Portfolio role:** emerging-technology exploration
+
 ## 🚀 Overview
 This repository is a collection of experiments and prototypes that blend **Spring Boot** and **Artificial Intelligence**.  
 It’s part of my ongoing research to understand how **AI-driven services** can enhance modern backend systems written in Java.
