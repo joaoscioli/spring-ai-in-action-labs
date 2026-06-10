@@ -12,8 +12,8 @@ engineering lab for Java and Spring Boot.
 
 ## Phase 2: Spring AI Fundamentals
 
-- Document core Spring AI concepts.
-- Explain model clients, prompts, advisors, and structured outputs.
+- Document core Spring AI concepts. Done.
+- Explain model clients, prompts, advisors, and structured outputs. Done.
 - Add small examples that are easy to review.
 
 ## Phase 3: Prompt and Response Patterns

@@ -37,11 +37,11 @@ The current implementation includes:
 Current sections:
 
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
+- [Spring AI Fundamentals](docs/spring-ai-fundamentals.md)
 - [Repository Roadmap](docs/roadmap.md)
 
 Planned sections:
 
-- Spring AI fundamentals;
 - prompt and response patterns;
 - tool calling examples;
 - RAG example;
