@@ -25,9 +25,9 @@ engineering lab for Java and Spring Boot.
 
 ## Phase 4: Tool Calling
 
-- Add a backend service tool example.
-- Show how the model can call application capabilities safely.
-- Document authorization and validation boundaries.
+- Add a backend service tool example. Done.
+- Show how the model can call application capabilities safely. Done.
+- Document authorization and validation boundaries. Done.
 
 ## Phase 5: Retrieval-Augmented Generation
 

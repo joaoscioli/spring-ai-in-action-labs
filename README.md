@@ -39,11 +39,11 @@ Current sections:
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
 - [Spring AI Fundamentals](docs/spring-ai-fundamentals.md)
 - [Prompt and Response Patterns](docs/prompt-response-patterns.md)
+- [Tool Calling](docs/tool-calling.md)
 - [Repository Roadmap](docs/roadmap.md)
 
 Planned sections:
 
-- tool calling examples;
 - RAG example;
 - evaluation strategy;
 - observability and cost notes;
