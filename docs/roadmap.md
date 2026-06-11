@@ -18,9 +18,9 @@ engineering lab for Java and Spring Boot.
 
 ## Phase 3: Prompt and Response Patterns
 
-- Add prompt templates.
-- Add structured response examples.
-- Document prompt boundaries and failure modes.
+- Add prompt templates. Done.
+- Add structured response examples. Done.
+- Document prompt boundaries and failure modes. Done.
 - Add tests for deterministic application logic around model calls.
 
 ## Phase 4: Tool Calling
