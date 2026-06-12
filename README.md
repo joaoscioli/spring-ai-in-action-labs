@@ -40,11 +40,11 @@ Current sections:
 - [Spring AI Fundamentals](docs/spring-ai-fundamentals.md)
 - [Prompt and Response Patterns](docs/prompt-response-patterns.md)
 - [Tool Calling](docs/tool-calling.md)
+- [Retrieval-Augmented Generation](docs/rag-pattern.md)
 - [Repository Roadmap](docs/roadmap.md)
 
 Planned sections:
 
-- RAG example;
 - evaluation strategy;
 - observability and cost notes;
 - stakeholder demo scenarios.

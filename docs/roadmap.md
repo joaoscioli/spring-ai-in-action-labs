@@ -31,9 +31,9 @@ engineering lab for Java and Spring Boot.
 
 ## Phase 5: Retrieval-Augmented Generation
 
-- Add a small RAG example.
-- Document chunking, retrieval, and answer generation.
-- Explain when RAG is better than long prompts.
+- Add a small RAG example. Done.
+- Document chunking, retrieval, and answer generation. Done.
+- Explain when RAG is better than long prompts. Done.
 
 ## Phase 6: Evaluation and Observability
 
