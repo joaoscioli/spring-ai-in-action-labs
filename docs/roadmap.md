@@ -37,7 +37,7 @@ engineering lab for Java and Spring Boot.
 
 ## Phase 6: Evaluation and Observability
 
-- Add evaluation notes.
-- Document cost and latency concerns.
-- Add logging guidelines for AI features.
-- Define what should never be logged.
+- Add evaluation notes. Done.
+- Document cost and latency concerns. Done.
+- Add logging guidelines for AI features. Done.
+- Define what should never be logged. Done.

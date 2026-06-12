@@ -41,12 +41,11 @@ Current sections:
 - [Prompt and Response Patterns](docs/prompt-response-patterns.md)
 - [Tool Calling](docs/tool-calling.md)
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
+- [Evaluation and Observability](docs/evaluation-observability.md)
 - [Repository Roadmap](docs/roadmap.md)
 
 Planned sections:
 
-- evaluation strategy;
-- observability and cost notes;
 - stakeholder demo scenarios.
 
 ## Portfolio Role
