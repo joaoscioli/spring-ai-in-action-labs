@@ -47,3 +47,9 @@ engineering lab for Java and Spring Boot.
 - Define stakeholder-friendly demo scenarios. Done.
 - Connect AI capabilities to business outcomes. Done.
 - Document demo safety and fallback expectations. Done.
+
+## Phase 8: Implementation Examples
+
+- Define practical implementation examples. Done.
+- Connect each example to engineering concerns. Done.
+- Convert selected examples into runnable code.
