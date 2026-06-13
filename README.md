@@ -42,11 +42,12 @@ Current sections:
 - [Tool Calling](docs/tool-calling.md)
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
 - [Evaluation and Observability](docs/evaluation-observability.md)
+- [Stakeholder Demo Scenarios](docs/stakeholder-demo-scenarios.md)
 - [Repository Roadmap](docs/roadmap.md)
 
 Planned sections:
 
-- stakeholder demo scenarios.
+- implementation examples.
 
 ## Portfolio Role
 

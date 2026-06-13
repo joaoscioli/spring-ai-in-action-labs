@@ -41,3 +41,9 @@ engineering lab for Java and Spring Boot.
 - Document cost and latency concerns. Done.
 - Add logging guidelines for AI features. Done.
 - Define what should never be logged. Done.
+
+## Phase 7: Stakeholder Demo Scenarios
+
+- Define stakeholder-friendly demo scenarios. Done.
+- Connect AI capabilities to business outcomes. Done.
+- Document demo safety and fallback expectations. Done.
