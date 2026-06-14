@@ -42,6 +42,7 @@ Current sections:
 - [Tool Calling](docs/tool-calling.md)
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
 - [Evaluation and Observability](docs/evaluation-observability.md)
+- [AI Safety Checklist](docs/ai-safety-checklist.md)
 - [Implementation Examples](docs/implementation-examples.md)
 - [Stakeholder Demo Scenarios](docs/stakeholder-demo-scenarios.md)
 - [Repository Roadmap](docs/roadmap.md)

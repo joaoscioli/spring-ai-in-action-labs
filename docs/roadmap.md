@@ -53,3 +53,8 @@ engineering lab for Java and Spring Boot.
 - Define practical implementation examples. Done.
 - Connect each example to engineering concerns. Done.
 - Convert selected examples into runnable code.
+
+## Phase 9: AI Safety
+
+- Add AI safety checklist. Done.
+- Document input, output, tool, RAG, and operational safety. Done.
