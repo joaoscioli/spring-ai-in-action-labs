@@ -58,3 +58,8 @@ engineering lab for Java and Spring Boot.
 
 - Add AI safety checklist. Done.
 - Document input, output, tool, RAG, and operational safety. Done.
+
+## Phase 10: Prompt Governance
+
+- Add prompt versioning guidance. Done.
+- Document evaluation expectations for prompt changes. Done.

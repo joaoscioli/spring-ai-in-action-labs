@@ -44,6 +44,7 @@ Current sections:
 - [Evaluation and Observability](docs/evaluation-observability.md)
 - [AI Safety Checklist](docs/ai-safety-checklist.md)
 - [Implementation Examples](docs/implementation-examples.md)
+- [Prompt Versioning](docs/prompt-versioning.md)
 - [Stakeholder Demo Scenarios](docs/stakeholder-demo-scenarios.md)
 - [Repository Roadmap](docs/roadmap.md)
 
