@@ -42,6 +42,7 @@ Current sections:
 - [Tool Calling](docs/tool-calling.md)
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
 - [Evaluation and Observability](docs/evaluation-observability.md)
+- [Evaluation Dataset Template](docs/evaluation-dataset-template.md)
 - [AI Safety Checklist](docs/ai-safety-checklist.md)
 - [Implementation Examples](docs/implementation-examples.md)
 - [Prompt Versioning](docs/prompt-versioning.md)

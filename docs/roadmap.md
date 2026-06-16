@@ -63,3 +63,8 @@ engineering lab for Java and Spring Boot.
 
 - Add prompt versioning guidance. Done.
 - Document evaluation expectations for prompt changes. Done.
+
+## Phase 11: Evaluation Dataset
+
+- Add evaluation dataset template. Done.
+- Document review process for prompt changes. Done.
