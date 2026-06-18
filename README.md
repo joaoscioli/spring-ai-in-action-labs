@@ -67,6 +67,7 @@ explain the engineering trade-offs behind AI features.
 - Java 21
 - Spring Boot
 - Spring AI
+- OpenAI Spring AI starter
 - Gradle
 - JUnit
 - WireMock

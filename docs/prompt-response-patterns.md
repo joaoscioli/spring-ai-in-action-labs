@@ -81,6 +81,10 @@ Good boundary rules:
 - ask for missing information when required;
 - return a structured response when the caller expects one.
 
+The runnable `board-game-buddy` example applies this idea with a system prompt
+that limits the assistant to board game questions before user input is sent to
+the model.
+
 Weak boundary rules:
 
 - "be helpful";

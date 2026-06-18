@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
@@ -21,7 +20,11 @@ import java.nio.charset.Charset;
 @EnableWireMock(
         @ConfigureWireMock(baseUrlProperties = "openai.base.url"))
 @SpringBootTest(
-        properties = "spring.ai.openai.base-url=${openai.base.url}")
+        properties = {
+                "spring.ai.openai.base-url=${openai.base.url}",
+                "spring.ai.azure.openai.chat.enabled=false",
+                "spring.ai.ollama.chat.enabled=false"
+        })
 public class SpringAiBoardGameServiceWireMockTests {
 
     @Value("classpath:/test-openai-response.json")

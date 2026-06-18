@@ -15,6 +15,11 @@ public class SpringAiBoardGameService implements BoardGameService {
     @Override
     public Anwser askQuestion(Question question) {
         var answerText = chatClient.prompt()
+                .system("""
+                        You are a board game assistant.
+                        Answer only board game questions.
+                        If the user asks about another topic, explain that you can only help with board games.
+                        """)
                 .user(question.question())
                 .call()
                 .content();
