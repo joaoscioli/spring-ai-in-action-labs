@@ -85,6 +85,10 @@ The runnable `board-game-buddy` example applies this idea with a system prompt
 that limits the assistant to board game questions before user input is sent to
 the model.
 
+It also validates blank questions before calling the model. This keeps simple
+input problems in deterministic application code instead of spending an AI
+request on a request the backend can reject locally.
+
 Weak boundary rules:
 
 - "be helpful";

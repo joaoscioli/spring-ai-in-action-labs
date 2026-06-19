@@ -17,6 +17,8 @@ import org.wiremock.spring.EnableWireMock;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 @EnableWireMock(
         @ConfigureWireMock(baseUrlProperties = "openai.base.url"))
 @SpringBootTest(
@@ -52,5 +54,12 @@ public class SpringAiBoardGameServiceWireMockTests {
                         new Question("What is the capital of France?"));
         Assertions.assertThat(answer).isNotNull();
         Assertions.assertThat(answer.answer()).isEqualTo("Paris");
+    }
+
+    @Test
+    public void rejectsBlankQuestionBeforeCallingModel() {
+        assertThatThrownBy(() -> new Question(" "))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("question must not be blank");
     }
 }
