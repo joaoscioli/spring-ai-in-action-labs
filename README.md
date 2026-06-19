@@ -37,6 +37,7 @@ The current implementation includes:
 Current sections:
 
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
+- [Local Development](docs/local-development.md)
 - [Spring AI Fundamentals](docs/spring-ai-fundamentals.md)
 - [Prompt and Response Patterns](docs/prompt-response-patterns.md)
 - [Tool Calling](docs/tool-calling.md)
