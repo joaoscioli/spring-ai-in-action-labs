@@ -48,6 +48,7 @@ Current sections:
 - [Evaluation Runbook](docs/evaluation-runbook.md)
 - [AI Cost And Latency Strategy](docs/cost-latency-strategy.md)
 - [Model Selection](docs/model-selection.md)
+- [AI Feature Rollout](docs/ai-feature-rollout.md)
 - [AI Safety Checklist](docs/ai-safety-checklist.md)
 - [Implementation Examples](docs/implementation-examples.md)
 - [Prompt Versioning](docs/prompt-versioning.md)
