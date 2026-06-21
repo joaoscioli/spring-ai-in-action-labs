@@ -45,6 +45,7 @@ Current sections:
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
 - [Evaluation and Observability](docs/evaluation-observability.md)
 - [Evaluation Dataset Template](docs/evaluation-dataset-template.md)
+- [Evaluation Runbook](docs/evaluation-runbook.md)
 - [AI Cost And Latency Strategy](docs/cost-latency-strategy.md)
 - [AI Safety Checklist](docs/ai-safety-checklist.md)
 - [Implementation Examples](docs/implementation-examples.md)
