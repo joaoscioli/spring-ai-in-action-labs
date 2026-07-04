@@ -41,6 +41,7 @@ Current sections:
 - [CI Workflow](docs/ci.md)
 - [Repository Hygiene](docs/repository-hygiene.md)
 - [Spring AI Fundamentals](docs/spring-ai-fundamentals.md)
+- [Board Game Buddy API](docs/board-game-buddy-api.md)
 - [Prompt and Response Patterns](docs/prompt-response-patterns.md)
 - [Tool Calling](docs/tool-calling.md)
 - [Retrieval-Augmented Generation](docs/rag-pattern.md)
