@@ -52,5 +52,9 @@ public class SpringAiBoardGameServiceWireMockTests {
                         new Question("What is the capital of France?"));
         Assertions.assertThat(answer).isNotNull();
         Assertions.assertThat(answer.answer()).isEqualTo("Paris");
+
+        WireMock.verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions"))
+                .withRequestBody(WireMock.containing("Answer only board game questions"))
+                .withRequestBody(WireMock.containing("If the user asks about another topic")));
     }
 }
