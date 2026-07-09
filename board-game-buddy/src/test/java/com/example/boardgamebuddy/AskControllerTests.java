@@ -52,4 +52,18 @@ class AskControllerTests {
                                 """))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void askRejectsQuestionThatExceedsTheCostGuardrail() throws Exception {
+        var oversizedQuestion = "a".repeat(501);
+
+        mockMvc.perform(post("/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "question": "%s"
+                                }
+                                """.formatted(oversizedQuestion)))
+                .andExpect(status().isBadRequest());
+    }
 }
