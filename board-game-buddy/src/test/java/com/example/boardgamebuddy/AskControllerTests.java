@@ -54,6 +54,14 @@ class AskControllerTests {
     }
 
     @Test
+    void askRejectsMissingQuestion() throws Exception {
+        mockMvc.perform(post("/ask")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void askRejectsQuestionThatExceedsTheCostGuardrail() throws Exception {
         var oversizedQuestion = "a".repeat(501);
 
