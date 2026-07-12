@@ -10,6 +10,7 @@ demonstrated by this repository.
 3. `docs/ai-safety-checklist.md` for safety boundaries.
 4. `docs/evaluation-runbook.md` for evaluation approach.
 5. `board-game-buddy/` for the runnable Spring AI lab.
+6. Controller tests for deterministic input guardrails before model calls.
 
 ## Strong Signals
 
@@ -18,9 +19,12 @@ demonstrated by this repository.
 - Prompt behavior, cost, latency, rollout, and evaluation are documented.
 - The lab separates deterministic API behavior from model-assisted behavior.
 - Tests protect input boundaries and provider integration assumptions.
+- Prompt versioning is connected to validation, cost control, and reviewable
+  behavior changes.
 
 ## Interview Talking Points
 
 - Explain why AI output needs evaluation rather than only unit tests.
 - Discuss prompt injection, cost control, and safe rollout.
 - Show how Spring AI fits into a normal backend engineering workflow.
+- Explain why AI features still need ordinary API contracts.
