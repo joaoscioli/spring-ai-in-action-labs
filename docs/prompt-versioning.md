@@ -43,9 +43,16 @@ Logs should include prompt version, not necessarily full prompt content.
 
 Avoid logging sensitive prompt data directly.
 
+## Input Guardrails
+
+Prompt versioning works best with request validation. Blank, missing, or
+oversized user input should be rejected before a model call so cost and behavior
+remain predictable.
+
 ## Interview Talking Points
 
 - Prompt changes are behavior changes.
 - Prompt versions help diagnose regressions.
 - Evaluation should run when prompts change.
 - Logging prompt version is safer than logging full prompt text.
+- Input validation is part of AI reliability, not just API hygiene.
