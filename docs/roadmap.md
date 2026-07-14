@@ -68,3 +68,9 @@ engineering lab for Java and Spring Boot.
 
 - Add evaluation dataset template. Done.
 - Document review process for prompt changes. Done.
+
+## Phase 12: Production AI Guardrails
+
+- Add explicit refusal examples to the evaluation dataset.
+- Add input validation and cost guardrail examples to runnable code.
+- Document how prompt version, model version, and evaluation version connect.
