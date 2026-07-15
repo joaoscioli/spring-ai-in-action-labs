@@ -69,6 +69,12 @@ It complements my production-minded Java and Spring Boot projects by showing
 that I can evaluate new frameworks, connect them to business use cases, and
 explain the engineering trade-offs behind AI features.
 
+## Interview Checkpoint
+
+A reviewer should inspect `board-game-buddy`, prompt versioning, input
+guardrails, and WireMock tests first. These show AI features being treated as
+backend features with contracts, safety boundaries, and evaluation thinking.
+
 ## Tech Focus
 
 - Java 21
