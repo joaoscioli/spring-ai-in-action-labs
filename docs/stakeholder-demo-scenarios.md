@@ -88,3 +88,10 @@ Each demo should show:
 - RAG is useful when answers need approved company knowledge.
 - Tool calling is useful when the model needs backend capabilities.
 - Evaluation proves the feature is more than a one-off demo.
+
+## Questions This Lab Can Answer
+
+- How do you keep an AI feature useful without trusting the model blindly?
+- What should be validated before calling an LLM?
+- How do prompt versioning and evaluation reduce regression risk?
+- When should a backend tool call be blocked even if the model asks for it?
