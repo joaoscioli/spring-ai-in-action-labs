@@ -28,3 +28,8 @@ demonstrated by this repository.
 - Discuss prompt injection, cost control, and safe rollout.
 - Show how Spring AI fits into a normal backend engineering workflow.
 - Explain why AI features still need ordinary API contracts.
+
+## Next Practical Step
+
+Add a tiny evaluation dataset with expected refusals and useful answers so
+prompt changes can be reviewed as behavior changes.
