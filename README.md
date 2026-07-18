@@ -75,6 +75,12 @@ A reviewer should inspect `board-game-buddy`, prompt versioning, input
 guardrails, and WireMock tests first. These show AI features being treated as
 backend features with contracts, safety boundaries, and evaluation thinking.
 
+## Portfolio Proof
+
+This repository proves emerging-technology judgment. It shows AI integration as
+software engineering work: prompts, validation, cost, safety, tests, and
+stakeholder value.
+
 ## Tech Focus
 
 - Java 21
