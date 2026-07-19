@@ -21,6 +21,7 @@ This lab focuses on:
 - Spring AI fundamentals;
 - LLM-backed backend features;
 - prompt design and prompt boundaries;
+- prompt versioning and input guardrails;
 - structured responses;
 - tool calling from application services;
 - retrieval-augmented generation;
