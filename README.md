@@ -57,6 +57,7 @@ Current sections:
 - [Prompt Versioning](docs/prompt-versioning.md)
 - [Stakeholder Demo Scenarios](docs/stakeholder-demo-scenarios.md)
 - [Repository Roadmap](docs/roadmap.md)
+- [Changelog](CHANGELOG.md)
 
 Planned sections:
 
