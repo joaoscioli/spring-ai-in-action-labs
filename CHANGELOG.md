@@ -2,6 +2,9 @@
 
 This project follows small, reviewable increments. Dates use `YYYY-MM-DD`.
 
+Review cadence: each portfolio update should improve AI reliability, evaluation
+discipline, safety boundaries, or backend integration clarity.
+
 ## Unreleased
 
 - Planned: tiny evaluation dataset with useful answers and expected refusals.
