@@ -5,6 +5,12 @@ This project follows small, reviewable increments. Dates use `YYYY-MM-DD`.
 Review cadence: each portfolio update should improve AI reliability, evaluation
 discipline, safety boundaries, or backend integration clarity.
 
+## How To Discuss This History
+
+Use this changelog to show AI engineering maturity. The strongest narrative is
+moving from model calls to prompt versioning, input validation, evaluation, and
+safe stakeholder demos.
+
 ## Unreleased
 
 - Planned: tiny evaluation dataset with useful answers and expected refusals.
