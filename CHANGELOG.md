@@ -11,6 +11,11 @@ Use this changelog to show AI engineering maturity. The strongest narrative is
 moving from model calls to prompt versioning, input validation, evaluation, and
 safe stakeholder demos.
 
+## Review Readiness
+
+Ready for interview review when AI examples show deterministic guardrails around
+non-deterministic model behavior.
+
 ## Unreleased
 
 - Planned: tiny evaluation dataset with useful answers and expected refusals.
