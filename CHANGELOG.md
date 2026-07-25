@@ -16,6 +16,9 @@ safe stakeholder demos.
 Ready for interview review when AI examples show deterministic guardrails around
 non-deterministic model behavior.
 
+Current public signal: Spring AI examples framed around prompt versioning,
+validation, testing, safety, cost, and stakeholder value.
+
 ## Unreleased
 
 - Planned: tiny evaluation dataset with useful answers and expected refusals.
