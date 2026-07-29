@@ -16,3 +16,9 @@ Use this short script to present the repository in a technical interview.
 - Prompt changes are behavior changes.
 - AI features need validation, safety, evaluation, and observability.
 - Stakeholder demos should include fallback behavior.
+
+## Before The Interview
+
+- Open the prompt versioning and input guardrail examples.
+- Be ready to explain what should not be sent to an LLM.
+- Prepare one example of evaluating a prompt change.
