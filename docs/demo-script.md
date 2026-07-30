@@ -22,3 +22,10 @@ Use this short script to present the repository in a technical interview.
 - Open the prompt versioning and input guardrail examples.
 - Be ready to explain what should not be sent to an LLM.
 - Prepare one example of evaluating a prompt change.
+
+## Avoid Saying
+
+- "The AI answers the question." Instead, explain validation, evaluation, and
+  fallback behavior.
+- "Prompt engineering solves it." Instead, explain the surrounding backend
+  controls.
