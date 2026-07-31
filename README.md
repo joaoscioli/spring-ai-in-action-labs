@@ -39,6 +39,7 @@ Current sections:
 
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
 - [Demo Script](docs/demo-script.md)
+- [Interview Questions](docs/interview-questions.md)
 - [Local Development](docs/local-development.md)
 - [CI Workflow](docs/ci.md)
 - [Repository Hygiene](docs/repository-hygiene.md)
