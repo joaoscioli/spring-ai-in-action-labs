@@ -23,6 +23,13 @@ Use this short script to present the repository in a technical interview.
 - Be ready to explain what should not be sent to an LLM.
 - Prepare one example of evaluating a prompt change.
 
+## Evidence To Open
+
+- `board-game-buddy/src/main/java/com/example/boardgamebuddy/AskController.java`
+- `board-game-buddy/src/main/java/com/example/boardgamebuddy/SpringAiBoardGameService.java`
+- `board-game-buddy/src/test/java/com/example/boardgamebuddy/AskControllerTests.java`
+- `board-game-buddy/src/test/java/com/example/boardgamebuddy/SpringAiBoardGameServiceWireMockTests.java`
+
 ## Avoid Saying
 
 - "The AI answers the question." Instead, explain validation, evaluation, and
