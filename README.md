@@ -38,6 +38,7 @@ The current implementation includes:
 Current sections:
 
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
+- [Reviewer Scorecard](docs/reviewer-scorecard.md)
 - [Demo Script](docs/demo-script.md)
 - [Interview Questions](docs/interview-questions.md)
 - [Local Development](docs/local-development.md)
