@@ -40,6 +40,7 @@ Current sections:
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)
 - [Reviewer Scorecard](docs/reviewer-scorecard.md)
 - [Technical Depth Map](docs/technical-depth-map.md)
+- [Portfolio Positioning](docs/portfolio-positioning.md)
 - [Demo Script](docs/demo-script.md)
 - [Interview Questions](docs/interview-questions.md)
 - [Local Development](docs/local-development.md)
