@@ -41,6 +41,7 @@ Current sections:
 - [Reviewer Scorecard](docs/reviewer-scorecard.md)
 - [Technical Depth Map](docs/technical-depth-map.md)
 - [Portfolio Positioning](docs/portfolio-positioning.md)
+- [Next Review Focus](docs/next-review-focus.md)
 - [Demo Script](docs/demo-script.md)
 - [Interview Questions](docs/interview-questions.md)
 - [Local Development](docs/local-development.md)
