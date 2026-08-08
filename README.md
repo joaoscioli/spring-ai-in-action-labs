@@ -42,6 +42,7 @@ Current sections:
 - [Technical Depth Map](docs/technical-depth-map.md)
 - [Portfolio Positioning](docs/portfolio-positioning.md)
 - [Hiring Manager Summary](docs/hiring-manager-summary.md)
+- [30-Second Pitch](docs/30-second-pitch.md)
 - [Next Review Focus](docs/next-review-focus.md)
 - [Demo Script](docs/demo-script.md)
 - [Interview Questions](docs/interview-questions.md)
