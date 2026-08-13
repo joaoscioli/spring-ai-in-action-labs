@@ -1,2 +1,10 @@
-# Default repository owner
+# Repository owner
 * @joaoscioli
+
+# Spring AI implementation examples
+/board-game-buddy/ @joaoscioli
+
+# AI engineering documentation and GitHub workflow
+/docs/ @joaoscioli
+/.github/ @joaoscioli
+README.md @joaoscioli
