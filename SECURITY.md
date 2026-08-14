@@ -1,26 +1,28 @@
 # Security Policy
 
-This repository is a Spring AI engineering lab. Security review is especially
-important because AI examples may involve prompts, API keys, tools, and model
-outputs.
+This repository explores AI features in backend systems, so security feedback
+should focus on secrets, prompt data, model boundaries, dependencies, and
+unsafe examples.
 
 ## Supported Scope
 
-Security review focuses on:
+Security feedback is welcome for:
 
-- API keys or model credentials committed by mistake;
-- prompt injection risks in examples;
-- unsafe tool-calling behavior;
-- sensitive data included in prompts, logs, or fixtures;
-- dependency risk in the Spring Boot application.
+- accidental API key or model credential exposure;
+- unsafe prompt or input-handling examples;
+- dependency vulnerabilities;
+- examples that send unnecessary sensitive data to a model;
+- misleading safety, evaluation, or rollout guidance.
 
-## Reporting A Security Concern
+## Reporting
 
-Open a concise issue describing the affected example or document. Do not post
-real API keys, customer data, private prompts, or exploitable details.
+Please do not open a public issue with sensitive details.
 
-## Development Practices
+Send a private report to `joaoscioli@outlook.com` with the affected file, the
+risk, and a suggested mitigation when possible.
 
-- Keep model credentials out of Git.
-- Use synthetic prompts and fixtures.
-- Document safety boundaries for AI-assisted features.
+## Security Expectations
+
+- Model credentials must never be committed.
+- Prompts should avoid secrets and unnecessary personal data.
+- AI behavior changes should include safety or evaluation notes when relevant.
