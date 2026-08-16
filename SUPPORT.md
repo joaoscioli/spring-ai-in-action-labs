@@ -18,6 +18,11 @@ the AI-assisted examples.
 - A test should cover unsafe, ambiguous, or malformed input.
 - A lab should document where AI is useful and where deterministic code wins.
 
+## Review Questions
+
+For portfolio or interview review, include the prompt, endpoint, test, or
+document being discussed and the AI behavior you want to evaluate.
+
 ## Out Of Scope
 
 - Production AI system support.
