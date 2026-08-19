@@ -94,6 +94,12 @@ This repository proves emerging-technology judgment. It shows AI integration as
 software engineering work: prompts, validation, cost, safety, tests, and
 stakeholder value.
 
+## Fast Review Path
+
+1. Read the [30-Second Pitch](docs/30-second-pitch.md) to understand the repository signal.
+2. Open the [Interview Case Study](docs/interview-case-study.md) to follow the AI engineering story.
+3. Inspect `board-game-buddy`, prompt versioning, guardrails, and WireMock tests to validate reviewability.
+
 ## Tech Focus
 
 - Java 21
