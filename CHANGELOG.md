@@ -24,6 +24,15 @@ validation, testing, safety, cost, and stakeholder value.
 - Planned: tiny evaluation dataset with useful answers and expected refusals.
 - Planned: stronger runnable guardrail examples.
 
+## 2026-08 Interview Readiness
+
+- Added fast review path, interview case study, and stronger AI engineering
+  talking points for technical interviews.
+- Refined GitHub hygiene with issue, pull request, CODEOWNERS, security, support,
+  contributing, and Dependabot configuration updates.
+- Clarified how to present AI features as backend behavior with validation,
+  evaluation, observability, safety, and stakeholder value.
+
 ## 2026-07 Portfolio Hardening
 
 - Added prompt versioning to the board game assistant.
