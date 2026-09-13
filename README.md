@@ -42,6 +42,7 @@ Current sections:
 - [Evidence Map](docs/evidence-map.md)
 - [Engineering Impact](docs/engineering-impact.md)
 - [Technical Scope](docs/technical-scope.md)
+- [Reviewer Entrypoint](docs/reviewer-entrypoint.md)
 - [Reviewer Scorecard](docs/reviewer-scorecard.md)
 - [Technical Depth Map](docs/technical-depth-map.md)
 - [Portfolio Positioning](docs/portfolio-positioning.md)
