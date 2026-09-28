@@ -57,6 +57,7 @@ Current sections:
 - [Interview Evaluation Criteria](docs/interview-evaluation-criteria.md)
 - [Deep Dive Prompts](docs/deep-dive-prompts.md)
 - [Hiring Signal](docs/hiring-signal.md)
+- [Technical Differentiators](docs/technical-differentiators.md)
 - [Reviewer Scorecard](docs/reviewer-scorecard.md)
 - [Technical Depth Map](docs/technical-depth-map.md)
 - [Portfolio Positioning](docs/portfolio-positioning.md)
