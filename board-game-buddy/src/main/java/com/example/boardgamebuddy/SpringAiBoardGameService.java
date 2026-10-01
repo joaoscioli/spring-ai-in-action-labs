@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 public class SpringAiBoardGameService implements BoardGameService {
 
     static final String SYSTEM_PROMPT_VERSION = "board-game-buddy-v1";
+    static final String EMPTY_RESPONSE_FALLBACK =
+            "I couldn't generate an answer. Please try your board game question again.";
 
     static final String SYSTEM_PROMPT = """
             Prompt version: board-game-buddy-v1.
@@ -29,6 +31,9 @@ public class SpringAiBoardGameService implements BoardGameService {
                 .user(question.question())
                 .call()
                 .content();
+        if (answerText == null || answerText.isBlank()) {
+            return new Anwser(EMPTY_RESPONSE_FALLBACK);
+        }
         return new Anwser(answerText);
     }
 }

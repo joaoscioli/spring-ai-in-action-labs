@@ -7,6 +7,9 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +44,24 @@ public class SpringAiBoardGameServiceWireMockTests {
         var responseNode = mapper.readTree(cannedResponse);
         WireMock.stubFor(WireMock.post("/v1/chat/completions")
                 .willReturn(ResponseDefinitionBuilder.okForJson(responseNode)));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " ", "\n\t"})
+    void returnsAnExplicitFallbackWhenTheProviderReturnsNoText(String content) throws IOException {
+        var mapper = new ObjectMapper();
+        var responseNode = mapper.readTree(responseResource.getContentAsString(Charset.defaultCharset()));
+        var message = (com.fasterxml.jackson.databind.node.ObjectNode)
+                responseNode.path("choices").get(0).path("message");
+        message.put("content", content);
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(ResponseDefinitionBuilder.okForJson(responseNode)));
+
+        var boardGameService = new SpringAiBoardGameService(chatClientBuilder);
+        var answer = boardGameService.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.EMPTY_RESPONSE_FALLBACK);
     }
 
     @Test
