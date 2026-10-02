@@ -80,4 +80,20 @@ public class SpringAiBoardGameServiceWireMockTests {
                 .withRequestBody(WireMock.containing("If the user asks about another topic"))
                 .withRequestBody(WireMock.containing("Prefer concise answers with rules references")));
     }
+
+    @ParameterizedTest
+    @ValueSource(ints = {400, 401, 403})
+    void returnsASafeFallbackWithoutRetryingNonTransientProviderErrors(int status) {
+        WireMock.resetAllRequests();
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withStatus(status)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":{\"message\":\"provider diagnostic must stay private\"}}")));
+
+        var service = new SpringAiBoardGameService(chatClientBuilder);
+        var answer = service.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+    }
 }
