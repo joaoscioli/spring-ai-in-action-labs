@@ -26,7 +26,12 @@ import java.nio.charset.Charset;
         properties = {
                 "spring.ai.openai.base-url=${openai.base.url}",
                 "spring.ai.azure.openai.chat.enabled=false",
-                "spring.ai.ollama.chat.enabled=false"
+                "spring.ai.ollama.chat.enabled=false",
+                // WireMock adds Apache HttpClient, whose 503 retries would multiply Spring AI attempts.
+                "spring.http.client.factory=simple",
+                "spring.ai.retry.max-attempts=3",
+                "spring.ai.retry.backoff.initial-interval=1ms",
+                "spring.ai.retry.backoff.max-interval=2ms"
         })
 public class SpringAiBoardGameServiceWireMockTests {
 
@@ -62,6 +67,22 @@ public class SpringAiBoardGameServiceWireMockTests {
         var answer = boardGameService.askQuestion(new Question("How many players can play Catan?"));
 
         Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.EMPTY_RESPONSE_FALLBACK);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {500, 503})
+    void returnsASafeFallbackAfterTransientRetriesAreExhausted(int status) {
+        WireMock.resetAllRequests();
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withStatus(status)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":{\"message\":\"private provider diagnostic\"}}")));
+
+        var service = new SpringAiBoardGameService(chatClientBuilder);
+        var answer = service.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
+        WireMock.verify(3, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
     }
 
     @Test

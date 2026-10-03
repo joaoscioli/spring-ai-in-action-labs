@@ -2,6 +2,7 @@ package com.example.boardgamebuddy;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.retry.NonTransientAiException;
+import org.springframework.ai.retry.TransientAiException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,7 +37,7 @@ public class SpringAiBoardGameService implements BoardGameService {
                     .user(question.question())
                     .call()
                     .content();
-        } catch (NonTransientAiException exception) {
+        } catch (NonTransientAiException | TransientAiException exception) {
             return new Anwser(PROVIDER_ERROR_FALLBACK);
         }
         if (answerText == null || answerText.isBlank()) {
