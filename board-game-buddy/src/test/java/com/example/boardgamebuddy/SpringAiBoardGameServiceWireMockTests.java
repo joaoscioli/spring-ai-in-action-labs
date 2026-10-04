@@ -43,6 +43,7 @@ public class SpringAiBoardGameServiceWireMockTests {
 
     @BeforeEach
     public void setup() throws IOException {
+        WireMock.reset();
         var cannedResponse =
                 responseResource.getContentAsString(Charset.defaultCharset());
         var mapper = new ObjectMapper();
@@ -83,6 +84,34 @@ public class SpringAiBoardGameServiceWireMockTests {
 
         Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
         WireMock.verify(3, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {500, 503})
+    void returnsProviderAnswerWhenATransientFailureRecoversOnTheNextAttempt(int status) throws IOException {
+        WireMock.resetAllRequests();
+        WireMock.resetAllScenarios();
+        var scenario = "provider recovery " + status;
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .atPriority(1)
+                .inScenario(scenario)
+                .whenScenarioStateIs(com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED)
+                .willSetStateTo("recovered")
+                .willReturn(WireMock.aResponse().withStatus(status)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":{\"message\":\"temporarily unavailable\"}}")));
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .atPriority(1)
+                .inScenario(scenario)
+                .whenScenarioStateIs("recovered")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(responseResource.getContentAsString(Charset.defaultCharset()))));
+
+        var service = new SpringAiBoardGameService(chatClientBuilder);
+        var answer = service.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(answer.answer()).isEqualTo("Paris");
+        WireMock.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
     }
 
     @Test
