@@ -115,6 +115,30 @@ public class SpringAiBoardGameServiceWireMockTests {
     }
 
     @Test
+    void aLaterQuestionCanRecoverAfterThePreviousQuestionExhaustsRetries() throws IOException {
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withStatus(503)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"error\":{\"message\":\"temporary outage\"}}")));
+        var service = new SpringAiBoardGameService(chatClientBuilder);
+
+        var first = service.askQuestion(new Question("How many players can play Catan?"));
+        Assertions.assertThat(first.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
+        WireMock.verify(3, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(responseResource.getContentAsString(Charset.defaultCharset()))));
+        var second = service.askQuestion(new Question("How do I play Ticket to Ride?"));
+
+        Assertions.assertThat(second.answer()).isEqualTo("Paris");
+        WireMock.verify(4, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions"))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages[1].content",
+                        WireMock.equalTo("How do I play Ticket to Ride?"))));
+    }
+
+    @Test
     public void testAskQuestion() {
         var boardGameService =
                 new SpringAiBoardGameService(chatClientBuilder);
