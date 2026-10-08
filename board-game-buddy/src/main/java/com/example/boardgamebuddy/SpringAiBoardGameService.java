@@ -4,9 +4,12 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.retry.TransientAiException;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class SpringAiBoardGameService implements BoardGameService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringAiBoardGameService.class);
 
     static final String SYSTEM_PROMPT_VERSION = "board-game-buddy-v1";
     static final String EMPTY_RESPONSE_FALLBACK =
@@ -38,9 +41,12 @@ public class SpringAiBoardGameService implements BoardGameService {
                     .call()
                     .content();
         } catch (NonTransientAiException | TransientAiException exception) {
+            LOGGER.warn("AI fallback promptVersion={} reason=provider_error exceptionType={}",
+                    SYSTEM_PROMPT_VERSION, exception.getClass().getSimpleName());
             return new Anwser(PROVIDER_ERROR_FALLBACK);
         }
         if (answerText == null || answerText.isBlank()) {
+            LOGGER.warn("AI fallback promptVersion={} reason=empty_response", SYSTEM_PROMPT_VERSION);
             return new Anwser(EMPTY_RESPONSE_FALLBACK);
         }
         return new Anwser(answerText);

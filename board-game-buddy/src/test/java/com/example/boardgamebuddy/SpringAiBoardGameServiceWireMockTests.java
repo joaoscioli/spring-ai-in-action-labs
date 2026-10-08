@@ -14,6 +14,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.core.io.Resource;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
@@ -33,6 +36,7 @@ import java.nio.charset.Charset;
                 "spring.ai.retry.backoff.initial-interval=1ms",
                 "spring.ai.retry.backoff.max-interval=2ms"
         })
+@ExtendWith(OutputCaptureExtension.class)
 public class SpringAiBoardGameServiceWireMockTests {
 
     @Value("classpath:/test-openai-response.json")
@@ -55,7 +59,7 @@ public class SpringAiBoardGameServiceWireMockTests {
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"", " ", "\n\t"})
-    void returnsAnExplicitFallbackWhenTheProviderReturnsNoText(String content) throws IOException {
+    void returnsAnExplicitFallbackWhenTheProviderReturnsNoText(String content, CapturedOutput output) throws IOException {
         var mapper = new ObjectMapper();
         var responseNode = mapper.readTree(responseResource.getContentAsString(Charset.defaultCharset()));
         var message = (com.fasterxml.jackson.databind.node.ObjectNode)
@@ -68,6 +72,7 @@ public class SpringAiBoardGameServiceWireMockTests {
         var answer = boardGameService.askQuestion(new Question("How many players can play Catan?"));
 
         Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.EMPTY_RESPONSE_FALLBACK);
+        Assertions.assertThat(output.getOut()).contains("AI fallback promptVersion=board-game-buddy-v1 reason=empty_response");
     }
 
     @ParameterizedTest
@@ -173,7 +178,7 @@ public class SpringAiBoardGameServiceWireMockTests {
 
     @ParameterizedTest
     @ValueSource(ints = {400, 401, 403})
-    void returnsASafeFallbackWithoutRetryingNonTransientProviderErrors(int status) {
+    void returnsASafeFallbackWithoutRetryingNonTransientProviderErrors(int status, CapturedOutput output) {
         WireMock.resetAllRequests();
         WireMock.stubFor(WireMock.post("/v1/chat/completions")
                 .willReturn(WireMock.aResponse().withStatus(status)
@@ -184,6 +189,13 @@ public class SpringAiBoardGameServiceWireMockTests {
         var answer = service.askQuestion(new Question("How many players can play Catan?"));
 
         Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
+        var serviceLog = output.getOut().lines()
+                .filter(line -> line.contains("AI fallback promptVersion="))
+                .toList();
+        Assertions.assertThat(serviceLog).hasSize(1);
+        Assertions.assertThat(serviceLog.get(0))
+                .contains("reason=provider_error exceptionType=NonTransientAiException")
+                .doesNotContain("provider diagnostic must stay private", "How many players can play Catan?");
         WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
     }
 }
