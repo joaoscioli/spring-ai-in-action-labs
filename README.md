@@ -35,6 +35,14 @@ The current implementation includes:
 
 - `board-game-buddy`: an experimental Spring Boot and Spring AI application.
 
+The application records `boardgame.answers` Micrometer counters with fixed
+`outcome` tags (`success`, `empty_response`, `provider_error`) and `prompt_version`.
+Each completed service answer counts once after provider retries; question text,
+response text and exception messages are excluded from metric tags. WireMock
+tests verify outcome counts, including three failed HTTP attempts counted as one
+provider-error answer. Actuator supplies the registry; metrics HTTP exposure
+remains opt-in through standard management configuration.
+
 Current sections:
 
 - [AI Engineering Positioning](docs/ai-engineering-positioning.md)

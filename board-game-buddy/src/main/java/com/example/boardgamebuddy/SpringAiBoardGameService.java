@@ -1,5 +1,8 @@
 package com.example.boardgamebuddy;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.ai.retry.TransientAiException;
@@ -26,9 +29,23 @@ public class SpringAiBoardGameService implements BoardGameService {
             """;
 
     private final ChatClient chatClient;
+    private final Counter successfulAnswers;
+    private final Counter emptyResponses;
+    private final Counter providerErrors;
 
-    public SpringAiBoardGameService(ChatClient.Builder chatClientBuilder) {
+    public SpringAiBoardGameService(ChatClient.Builder chatClientBuilder, MeterRegistry meterRegistry) {
         this.chatClient = chatClientBuilder.build();
+        this.successfulAnswers = outcomeCounter(meterRegistry, "success");
+        this.emptyResponses = outcomeCounter(meterRegistry, "empty_response");
+        this.providerErrors = outcomeCounter(meterRegistry, "provider_error");
+    }
+
+    private static Counter outcomeCounter(MeterRegistry registry, String outcome) {
+        return Counter.builder("boardgame.answers")
+                .description("Completed board game answers by service outcome, after provider retries")
+                .tag("prompt_version", SYSTEM_PROMPT_VERSION)
+                .tag("outcome", outcome)
+                .register(registry);
     }
 
     @Override
@@ -41,14 +58,17 @@ public class SpringAiBoardGameService implements BoardGameService {
                     .call()
                     .content();
         } catch (NonTransientAiException | TransientAiException exception) {
+            providerErrors.increment();
             LOGGER.warn("AI fallback promptVersion={} reason=provider_error exceptionType={}",
                     SYSTEM_PROMPT_VERSION, exception.getClass().getSimpleName());
             return new Anwser(PROVIDER_ERROR_FALLBACK);
         }
         if (answerText == null || answerText.isBlank()) {
+            emptyResponses.increment();
             LOGGER.warn("AI fallback promptVersion={} reason=empty_response", SYSTEM_PROMPT_VERSION);
             return new Anwser(EMPTY_RESPONSE_FALLBACK);
         }
+        successfulAnswers.increment();
         return new Anwser(answerText);
     }
 }
