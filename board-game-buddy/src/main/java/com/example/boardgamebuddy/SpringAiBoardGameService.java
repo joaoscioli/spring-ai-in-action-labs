@@ -2,6 +2,7 @@ package com.example.boardgamebuddy;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.retry.NonTransientAiException;
@@ -32,12 +33,17 @@ public class SpringAiBoardGameService implements BoardGameService {
     private final Counter successfulAnswers;
     private final Counter emptyResponses;
     private final Counter providerErrors;
+    private final Timer answerLatency;
 
     public SpringAiBoardGameService(ChatClient.Builder chatClientBuilder, MeterRegistry meterRegistry) {
         this.chatClient = chatClientBuilder.build();
         this.successfulAnswers = outcomeCounter(meterRegistry, "success");
         this.emptyResponses = outcomeCounter(meterRegistry, "empty_response");
         this.providerErrors = outcomeCounter(meterRegistry, "provider_error");
+        this.answerLatency = Timer.builder("boardgame.answer.duration")
+                .description("Total service answer latency including provider retries and fallback")
+                .tag("prompt_version", SYSTEM_PROMPT_VERSION)
+                .register(meterRegistry);
     }
 
     private static Counter outcomeCounter(MeterRegistry registry, String outcome) {
@@ -50,6 +56,10 @@ public class SpringAiBoardGameService implements BoardGameService {
 
     @Override
     public Anwser askQuestion(Question question) {
+        return answerLatency.record(() -> answerQuestion(question));
+    }
+
+    private Anwser answerQuestion(Question question) {
         final String answerText;
         try {
             answerText = chatClient.prompt()

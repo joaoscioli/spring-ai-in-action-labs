@@ -49,6 +49,13 @@ public class SpringAiBoardGameServiceWireMockTests {
     private SimpleMeterRegistry metrics;
 
     private void assertOutcomes(double success, double empty, double error) {
+        var latency = metrics.get("boardgame.answer.duration")
+                .tag("prompt_version", SpringAiBoardGameService.SYSTEM_PROMPT_VERSION).timer();
+        Assertions.assertThat(latency.count()).isEqualTo((long) (success + empty + error));
+        Assertions.assertThat(latency.totalTime(java.util.concurrent.TimeUnit.NANOSECONDS)).isPositive();
+        Assertions.assertThat(latency.getId().getTags())
+                .containsExactly(io.micrometer.core.instrument.Tag.of(
+                        "prompt_version", SpringAiBoardGameService.SYSTEM_PROMPT_VERSION));
         Assertions.assertThat(metrics.get("boardgame.answers").tag("prompt_version", SpringAiBoardGameService.SYSTEM_PROMPT_VERSION).tag("outcome", "success").counter().count()).isEqualTo(success);
         Assertions.assertThat(metrics.get("boardgame.answers").tag("prompt_version", SpringAiBoardGameService.SYSTEM_PROMPT_VERSION).tag("outcome", "empty_response").counter().count()).isEqualTo(empty);
         Assertions.assertThat(metrics.get("boardgame.answers").tag("prompt_version", SpringAiBoardGameService.SYSTEM_PROMPT_VERSION).tag("outcome", "provider_error").counter().count()).isEqualTo(error);

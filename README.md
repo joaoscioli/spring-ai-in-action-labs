@@ -35,6 +35,12 @@ The current implementation includes:
 
 - `board-game-buddy`: an experimental Spring Boot and Spring AI application.
 
+The application records `boardgame.answer.duration` as one timer sample per
+service call, including provider retries, backoff and fallback handling. Its only
+tag is `prompt_version`; questions, answers and provider diagnostics are excluded.
+WireMock tests verify one sample for success, empty answers and exhausted retries,
+and two samples when a later question recovers after an outage.
+
 The application records `boardgame.answers` Micrometer counters with fixed
 `outcome` tags (`success`, `empty_response`, `provider_error`) and `prompt_version`.
 Each completed service answer counts once after provider retries; question text,
