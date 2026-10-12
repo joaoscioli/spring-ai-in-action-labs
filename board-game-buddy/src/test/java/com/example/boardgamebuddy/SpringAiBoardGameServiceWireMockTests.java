@@ -165,6 +165,35 @@ public class SpringAiBoardGameServiceWireMockTests {
     }
 
     @Test
+    void emptyAnswerFallbackDoesNotContaminateTheNextQuestionsPrompt() throws IOException {
+        var response = new ObjectMapper().readTree(responseResource.getContentAsString(Charset.defaultCharset()));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) response.path("choices").get(0).path("message"))
+                .put("content", " ");
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(ResponseDefinitionBuilder.okForJson(response)));
+        var service = new SpringAiBoardGameService(chatClientBuilder, metrics);
+        var first = service.askQuestion(new Question("How do I play Catan?"));
+        Assertions.assertThat(first.answer()).isEqualTo(SpringAiBoardGameService.EMPTY_RESPONSE_FALLBACK);
+
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(responseResource.getContentAsString(Charset.defaultCharset()))));
+        var second = service.askQuestion(new Question("How do I play Ticket to Ride?"));
+
+        Assertions.assertThat(second.answer()).isEqualTo("Paris");
+        assertOutcomes(1, 1, 0);
+        WireMock.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions"))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages.length()", WireMock.equalTo("2")))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages[0].role", WireMock.equalTo("system")))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages[0].content",
+                        WireMock.equalTo(SpringAiBoardGameService.SYSTEM_PROMPT)))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages[1].role", WireMock.equalTo("user")))
+                .withRequestBody(WireMock.matchingJsonPath("$.messages[1].content",
+                        WireMock.equalTo("How do I play Ticket to Ride?"))));
+    }
+
+    @Test
     public void testAskQuestion() {
         var boardGameService =
                 new SpringAiBoardGameService(chatClientBuilder, metrics);
