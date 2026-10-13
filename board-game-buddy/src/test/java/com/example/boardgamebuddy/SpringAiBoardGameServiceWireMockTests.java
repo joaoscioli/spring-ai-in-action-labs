@@ -95,7 +95,7 @@ public class SpringAiBoardGameServiceWireMockTests {
 
     @ParameterizedTest
     @ValueSource(ints = {500, 503})
-    void returnsASafeFallbackAfterTransientRetriesAreExhausted(int status) {
+    void returnsASafeFallbackAfterTransientRetriesAreExhausted(int status, CapturedOutput output) {
         WireMock.resetAllRequests();
         WireMock.stubFor(WireMock.post("/v1/chat/completions")
                 .willReturn(WireMock.aResponse().withStatus(status)
@@ -108,6 +108,13 @@ public class SpringAiBoardGameServiceWireMockTests {
         Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
         assertOutcomes(0, 0, 1);
         WireMock.verify(3, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+        var serviceLog = output.getOut().lines()
+                .filter(line -> line.contains("AI fallback promptVersion="))
+                .toList();
+        Assertions.assertThat(serviceLog).hasSize(1);
+        Assertions.assertThat(serviceLog.get(0))
+                .contains("reason=provider_error exceptionType=TransientAiException")
+                .doesNotContain("private provider diagnostic", "How many players can play Catan?");
     }
 
     @ParameterizedTest
