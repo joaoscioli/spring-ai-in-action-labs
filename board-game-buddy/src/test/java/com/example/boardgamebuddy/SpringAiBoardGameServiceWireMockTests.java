@@ -172,6 +172,32 @@ public class SpringAiBoardGameServiceWireMockTests {
     }
 
     @Test
+    void rateLimitReturnsFallbackWithoutImmediateRetryAndALaterQuestionCanRecover() throws IOException {
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withStatus(429)
+                        .withHeader("Content-Type", "application/json")
+                        .withHeader("Retry-After", "60")
+                        .withBody("{\"error\":{\"message\":\"rate limited\"}}")));
+        var service = new SpringAiBoardGameService(chatClientBuilder, metrics);
+
+        var first = service.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(first.answer()).isEqualTo(SpringAiBoardGameService.PROVIDER_ERROR_FALLBACK);
+        assertOutcomes(0, 0, 1);
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+
+        // Simulate the provider accepting requests again; no real wait or live API.
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(responseResource.getContentAsString(Charset.defaultCharset()))));
+        var second = service.askQuestion(new Question("How do I play Ticket to Ride?"));
+
+        Assertions.assertThat(second.answer()).isEqualTo("Paris");
+        assertOutcomes(1, 0, 1);
+        WireMock.verify(2, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+    }
+
+    @Test
     void emptyAnswerFallbackDoesNotContaminateTheNextQuestionsPrompt() throws IOException {
         var response = new ObjectMapper().readTree(responseResource.getContentAsString(Charset.defaultCharset()));
         ((com.fasterxml.jackson.databind.node.ObjectNode) response.path("choices").get(0).path("message"))
