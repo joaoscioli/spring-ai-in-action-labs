@@ -74,6 +74,24 @@ public class SpringAiBoardGameServiceWireMockTests {
     }
 
     @ParameterizedTest
+    @ValueSource(strings = {"{}", "{\"choices\":[]}"})
+    void missingProviderChoicesReturnEmptyFallbackWithoutRetryOrFalseSuccess(String response, CapturedOutput output) {
+        WireMock.stubFor(WireMock.post("/v1/chat/completions")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", "application/json")
+                        .withBody(response)));
+        var service = new SpringAiBoardGameService(chatClientBuilder, metrics);
+
+        var answer = service.askQuestion(new Question("How many players can play Catan?"));
+
+        Assertions.assertThat(answer.answer()).isEqualTo(SpringAiBoardGameService.EMPTY_RESPONSE_FALLBACK);
+        assertOutcomes(0, 1, 0);
+        WireMock.verify(1, WireMock.postRequestedFor(WireMock.urlEqualTo("/v1/chat/completions")));
+        Assertions.assertThat(output.getOut().lines()
+                .filter(line -> line.contains("AI fallback promptVersion=")).toList())
+                .singleElement().asString().contains("reason=empty_response");
+    }
+
+    @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"", " ", "\n\t"})
     void returnsAnExplicitFallbackWhenTheProviderReturnsNoText(String content, CapturedOutput output) throws IOException {
