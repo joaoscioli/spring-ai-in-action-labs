@@ -174,6 +174,26 @@ stakeholder value.
 - Document trade-offs around cost, latency, reliability, and safety.
 - Preserve learning history while improving presentation quality.
 
+## Opt-in answer evaluation
+
+Start `board-game-buddy` with your provider credentials, then run
+`python evaluation/evaluate.py --base-url http://localhost:8080` from this repository.
+This makes three real `/ask` requests and may incur provider charges. It prints
+case IDs, pass/fail reasons and a total, returning exit code 1 if any case fails.
+There are no evaluator retries; the application's configured provider retries
+still apply. Set `--timeout` in seconds to bound each request.
+
+The versioned cases check basic Catan facts, bishop movement and an off-topic
+refusal using deterministic regex rubrics. Generic fallback responses fail.
+These are smoke checks: keyword presence cannot establish factual correctness,
+detect contradictions or prove prompt-injection resistance. Review real answers
+and expand the rubric before treating results as a quality gate. The report
+omits questions, answers and provider diagnostics.
+
+Run `python -m unittest discover -s evaluation -p "test_*.py"` to verify the
+evaluator with canned responses and transport failures, without provider calls.
+CI runs these offline tests, including local HTTP checks of command exit codes.
+
 ## Interview Talking Points
 
 - How AI features fit into backend systems.

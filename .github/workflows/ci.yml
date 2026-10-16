@@ -31,3 +31,6 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
+
+      - name: Test answer evaluator without a provider
+        run: python3 -m unittest discover -s ../evaluation -p 'test_*.py'

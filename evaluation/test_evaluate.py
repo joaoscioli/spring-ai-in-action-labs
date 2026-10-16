@@ -1,0 +1,98 @@
+import json
+import unittest
+import subprocess
+import sys
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
+from pathlib import Path
+from unittest.mock import patch
+from urllib.error import URLError
+
+from evaluate import evaluate, passes
+
+
+class EvaluationTests(unittest.TestCase):
+    def setUp(self):
+        self.cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
+
+    def test_reference_answers_pass_and_fallbacks_or_wrong_answers_fail(self):
+        for case, good, wrong in zip(self.cases, (
+            "The base game supports three to four players.",
+            "A bishop moves diagonally across the board.",
+            "I can only help with board games.",
+        ), ("Two players.", "Horizontally.", "Boil pasta in water.")):
+            with self.subTest(case=case["id"]):
+                self.assertTrue(passes(case, good))
+                for bad in (wrong, "The board game assistant is unavailable right now.", "", None):
+                    self.assertFalse(passes(case, bad))
+
+    @patch("evaluate.urlopen")
+    def test_posts_each_question_once_and_continues_after_transport_failure(self, open_url):
+        open_url.side_effect = [
+            BytesIO(b'{"answer":"Three to four players."}'),
+            URLError("private diagnostic"),
+            BytesIO(b'{"answer":"I can only help with board games."}'),
+        ]
+        results = evaluate("http://localhost:8080/", self.cases, 2)
+        self.assertEqual([True, False, True], [item["passed"] for item in results])
+        self.assertEqual("request_failed", results[1]["reason"])
+        self.assertNotIn("private diagnostic", json.dumps(results))
+        self.assertEqual(3, open_url.call_count)
+        for call, case in zip(open_url.call_args_list, self.cases):
+            request = call.args[0]
+            self.assertEqual("http://localhost:8080/ask", request.full_url)
+            self.assertEqual("POST", request.method)
+            self.assertEqual({"question": case["question"]}, json.loads(request.data))
+            self.assertEqual(2, call.kwargs["timeout"])
+
+    @patch("evaluate.urlopen")
+    def test_malformed_or_missing_answers_fail_without_false_success(self, open_url):
+        for response in (b'not json', b'{}', b'[]', b'{"answer":42}'):
+            with self.subTest(response=response):
+                open_url.return_value = BytesIO(response)
+                self.assertFalse(evaluate("http://localhost:8080", self.cases[:1], 2)[0]["passed"])
+
+    def test_command_exit_code_matches_results_over_real_local_http(self):
+        answers = dict(zip((case["question"] for case in self.cases), (
+            "Three to four players.", "Diagonally.", "I can only help with board games."
+        )))
+        requests = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                requests.append(self.path)
+                question = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+                body = json.dumps({"answer": answers[question["question"]]}).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        worker = threading.Thread(target=server.serve_forever, daemon=True)
+        worker.start()
+        try:
+            command = [sys.executable, str(Path(__file__).with_name("evaluate.py")),
+                       "--base-url", "http://127.0.0.1:" + str(server.server_port), "--timeout", "2"]
+            good = subprocess.run(command, capture_output=True, text=True, timeout=10)
+            self.assertEqual(0, good.returncode, good.stderr)
+            self.assertEqual(3, json.loads(good.stdout)["passed"])
+
+            answers[self.cases[0]["question"]] = "I couldn't generate an answer. Please try again."
+            bad = subprocess.run(command, capture_output=True, text=True, timeout=10)
+            self.assertEqual(1, bad.returncode, bad.stderr)
+            self.assertEqual(2, json.loads(bad.stdout)["passed"])
+            self.assertEqual(["/ask"] * 6, requests)
+        finally:
+            server.shutdown()
+            worker.join(timeout=2)
+            server.server_close()
+
+
+if __name__ == "__main__":
+    unittest.main()

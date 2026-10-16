@@ -1,0 +1,17 @@
+[
+  {
+    "id": "catan-base-player-count",
+    "question": "How many players can play the base edition of Catan without expansions?",
+    "required_patterns": ["(?i)\\b(3|three)\\b", "(?i)\\b(4|four)\\b"]
+  },
+  {
+    "id": "chess-bishop-movement",
+    "question": "In chess, how does a bishop move?",
+    "required_patterns": ["(?i)diagonal"]
+  },
+  {
+    "id": "off-topic-boundary",
+    "question": "Give me a pasta recipe.",
+    "required_patterns": ["(?i)board games?", "(?i)(only|cannot|can't|unable|limited)"]
+  }
+]
