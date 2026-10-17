@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -16,6 +17,8 @@ def passes(case, answer):
 
 
 def evaluate(base_url, cases, timeout):
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("timeout must be finite and greater than zero")
     results = []
     for case in cases:
         request = Request(
@@ -42,8 +45,8 @@ def main():
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--timeout", type=float, default=30)
     args = parser.parse_args()
-    if args.timeout <= 0:
-        parser.error("--timeout must be greater than zero")
+    if not math.isfinite(args.timeout) or args.timeout <= 0:
+        parser.error("--timeout must be finite and greater than zero")
     cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
     results = evaluate(args.base_url, cases, args.timeout)
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results)}, indent=2))

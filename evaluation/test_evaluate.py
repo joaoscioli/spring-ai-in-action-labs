@@ -13,6 +13,24 @@ from evaluate import evaluate, passes
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_invalid_timeouts_fail_before_any_http_request(self, open_url):
+        for timeout in (0, -1, float("nan"), float("inf"), float("-inf")):
+            with self.subTest(timeout=timeout):
+                with self.assertRaisesRegex(ValueError, "finite and greater than zero"):
+                    evaluate("http://localhost:8080", [{"id": "unused"}], timeout)
+        open_url.assert_not_called()
+
+    def test_cli_rejects_nonfinite_and_nonpositive_timeouts_as_usage_errors(self):
+        for timeout in ("0", "-1", "nan", "inf", "-inf"):
+            with self.subTest(timeout=timeout):
+                result = subprocess.run(
+                    [sys.executable, str(Path(__file__).with_name("evaluate.py")),
+                     "--timeout=" + timeout], capture_output=True, text=True, timeout=10)
+                self.assertEqual(2, result.returncode, result.stderr)
+                self.assertIn("finite and greater than zero", result.stderr)
+                self.assertEqual("", result.stdout)
+
     def setUp(self):
         self.cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
 
