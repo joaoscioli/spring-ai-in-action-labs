@@ -194,6 +194,8 @@ Run `python -m unittest discover -s evaluation -p "test_*.py"` to verify the
 evaluator with canned responses and transport failures, without provider calls.
 CI runs these offline tests, including local HTTP checks of command exit codes.
 
+The evaluator validates the complete case dataset before making any HTTP request: a nonempty list, unique nonblank IDs, nonblank questions up to 500 characters, and nonempty lists of valid, nonblank regex patterns. Invalid datasets raise `ValueError` in the API and exit 2 as CLI usage errors; they cannot produce an empty successful report or consume provider calls before a later invalid case is found.
+
 ## Interview Talking Points
 
 - How AI features fit into backend systems.

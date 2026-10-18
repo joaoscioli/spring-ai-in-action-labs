@@ -16,9 +16,38 @@ def passes(case, answer):
     )
 
 
+def validate_cases(cases):
+    if not isinstance(cases, list) or not cases:
+        raise ValueError("cases must be a nonempty list")
+    seen = set()
+    for index, case in enumerate(cases):
+        prefix = f"case {index + 1}: "
+        if not isinstance(case, dict):
+            raise ValueError(prefix + "must be an object")
+        case_id = case.get("id")
+        if not isinstance(case_id, str) or not case_id.strip() or case_id in seen:
+            raise ValueError(prefix + "id must be a unique nonblank string")
+        seen.add(case_id)
+        question = case.get("question")
+        if not isinstance(question, str) or not question.strip() or len(question) > 500:
+            raise ValueError(prefix + "question must contain 1-500 characters and not be blank")
+        patterns = case.get("required_patterns")
+        if not isinstance(patterns, list) or not patterns:
+            raise ValueError(prefix + "required_patterns must be a nonempty list")
+        for pattern in patterns:
+            if not isinstance(pattern, str) or not pattern.strip():
+                raise ValueError(prefix + "patterns must be nonblank strings")
+            try:
+                re.compile(pattern)
+            except re.error:
+                raise ValueError(prefix + "pattern must be a valid regular expression") from None
+
+
 def evaluate(base_url, cases, timeout):
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError("timeout must be finite and greater than zero")
+    # Validate the entire dataset before the first potentially billable request.
+    validate_cases(cases)
     results = []
     for case in cases:
         request = Request(
@@ -47,8 +76,11 @@ def main():
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or args.timeout <= 0:
         parser.error("--timeout must be finite and greater than zero")
-    cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
-    results = evaluate(args.base_url, cases, args.timeout)
+    try:
+        cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
+        results = evaluate(args.base_url, cases, args.timeout)
+    except ValueError as error:
+        parser.error(str(error))
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results)}, indent=2))
     return 0 if all(item["passed"] for item in results) else 1
 

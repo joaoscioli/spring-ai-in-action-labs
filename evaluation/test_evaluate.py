@@ -3,16 +3,58 @@ import unittest
 import subprocess
 import sys
 import threading
+from contextlib import redirect_stderr
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from unittest.mock import patch
 from urllib.error import URLError
 
-from evaluate import evaluate, passes
+from evaluate import evaluate, main, passes
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_cli_reports_invalid_dataset_as_usage_error_without_requests(self, open_url):
+        errors = StringIO()
+        with patch.object(sys, "argv", ["evaluate.py"]), \
+                patch("evaluate.Path.read_text", return_value="[]"), redirect_stderr(errors):
+            with self.assertRaises(SystemExit) as failure:
+                main()
+        self.assertEqual(2, failure.exception.code)
+        self.assertIn("cases must be a nonempty list", errors.getvalue())
+        open_url.assert_not_called()
+
+    @patch("evaluate.urlopen")
+    def test_invalid_datasets_fail_before_any_request_including_a_later_bad_case(self, open_url):
+        valid = {"id": "valid", "question": "How does a bishop move?",
+                 "required_patterns": ["diagonal"]}
+        invalid_cases = [None, [], {}, [None]]
+        for field, values in {
+            "id": [None, "", " "],
+            "question": [None, "", " ", "x" * 501],
+            "required_patterns": [None, [], "diagonal", [None], [""], [" "], ["["]],
+        }.items():
+            for value in values:
+                invalid = dict(valid, id="second")
+                invalid[field] = value
+                invalid_cases.append([valid, invalid])
+        invalid_cases.append([valid, dict(valid)])
+        for cases in invalid_cases:
+            with self.subTest(cases=cases):
+                with self.assertRaises(ValueError):
+                    evaluate("http://localhost:8080", cases, 2)
+        open_url.assert_not_called()
+
+    @patch("evaluate.urlopen")
+    def test_valid_question_boundary_and_multiple_patterns_are_evaluated(self, open_url):
+        cases = [{"id": "boundary", "question": "x" * 500,
+                  "required_patterns": ["(?i)diagonal", "board"]}]
+        open_url.return_value = BytesIO(b'{"answer":"Diagonally across the board."}')
+        self.assertEqual([{"id": "boundary", "passed": True, "reason": "matched"}],
+                         evaluate("http://localhost:8080", cases, 2))
+        self.assertEqual(1, open_url.call_count)
+
     @patch("evaluate.urlopen")
     def test_invalid_timeouts_fail_before_any_http_request(self, open_url):
         for timeout in (0, -1, float("nan"), float("inf"), float("-inf")):
