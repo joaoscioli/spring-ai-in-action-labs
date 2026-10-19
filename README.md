@@ -176,6 +176,13 @@ stakeholder value.
 
 ## Opt-in answer evaluation
 
+Cases may include an optional `forbidden_patterns` regex list (empty by default).
+Every required pattern must match and no forbidden pattern may match. The bishop
+case rejects answers that also claim horizontal or vertical movement. All regexes
+are validated before HTTP requests. These are lexical checks: even a correct
+negated phrase such as "not horizontally" fails this rubric, so review failures
+before interpreting the score as model quality.
+
 Start `board-game-buddy` with your provider credentials, then run
 `python evaluation/evaluate.py --base-url http://localhost:8080` from this repository.
 This makes three real `/ask` requests and may incur provider charges. It prints

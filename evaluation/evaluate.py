@@ -13,7 +13,7 @@ from urllib.request import Request, urlopen
 def passes(case, answer):
     return isinstance(answer, str) and all(
         re.search(pattern, answer) for pattern in case["required_patterns"]
-    )
+    ) and not any(re.search(pattern, answer) for pattern in case.get("forbidden_patterns", []))
 
 
 def validate_cases(cases):
@@ -34,7 +34,10 @@ def validate_cases(cases):
         patterns = case.get("required_patterns")
         if not isinstance(patterns, list) or not patterns:
             raise ValueError(prefix + "required_patterns must be a nonempty list")
-        for pattern in patterns:
+        forbidden = case.get("forbidden_patterns", [])
+        if not isinstance(forbidden, list):
+            raise ValueError(prefix + "forbidden_patterns must be a list")
+        for pattern in patterns + forbidden:
             if not isinstance(pattern, str) or not pattern.strip():
                 raise ValueError(prefix + "patterns must be nonblank strings")
             try:

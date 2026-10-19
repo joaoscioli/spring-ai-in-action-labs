@@ -15,6 +15,38 @@ from evaluate import evaluate, main, passes
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_forbidden_pattern_fails_even_when_all_required_patterns_match(self, open_url):
+        case = {"id": "bishop", "question": "How does a bishop move?",
+                "required_patterns": ["(?i)diagonal"],
+                "forbidden_patterns": ["(?i)horizontally", "(?i)vertically"]}
+        for answer, expected in (("Diagonally.", True),
+                                 ("Diagonally and horizontally.", False),
+                                 ("Diagonally or VERTICALLY.", False),
+                                 ("Horizontally.", False)):
+            with self.subTest(answer=answer):
+                open_url.return_value = BytesIO(json.dumps({"answer": answer}).encode())
+                result = evaluate("http://localhost:8080", [case], 2)[0]
+                self.assertEqual(expected, result["passed"])
+                self.assertEqual("matched" if expected else "rubric_mismatch", result["reason"])
+                self.assertNotIn(answer, json.dumps(result))
+
+    @patch("evaluate.urlopen")
+    def test_invalid_forbidden_patterns_in_later_case_prevent_all_requests(self, open_url):
+        valid = {"id": "first", "question": "How does a bishop move?",
+                 "required_patterns": ["diagonal"]}
+        for forbidden in (None, "horizontal", [None], [""], [" "], ["["]):
+            with self.subTest(forbidden=forbidden):
+                with self.assertRaises(ValueError):
+                    evaluate("http://localhost:8080",
+                             [valid, dict(valid, id="second", forbidden_patterns=forbidden)], 2)
+        open_url.assert_not_called()
+
+    def test_optional_empty_forbidden_patterns_preserve_existing_rubrics(self):
+        case = {"required_patterns": ["diagonal"]}
+        self.assertTrue(passes(case, "diagonal"))
+        self.assertTrue(passes(dict(case, forbidden_patterns=[]), "diagonal"))
+
+    @patch("evaluate.urlopen")
     def test_cli_reports_invalid_dataset_as_usage_error_without_requests(self, open_url):
         errors = StringIO()
         with patch.object(sys, "argv", ["evaluate.py"]), \

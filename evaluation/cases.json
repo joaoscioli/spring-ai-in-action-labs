@@ -7,7 +7,8 @@
   {
     "id": "chess-bishop-movement",
     "question": "In chess, how does a bishop move?",
-    "required_patterns": ["(?i)diagonal"]
+    "required_patterns": ["(?i)diagonal"],
+    "forbidden_patterns": ["(?i)\\b(horizontally|vertically)\\b"]
   },
   {
     "id": "off-topic-boundary",
