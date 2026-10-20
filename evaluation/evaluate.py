@@ -5,6 +5,7 @@ import json
 import math
 import re
 import sys
+from time import perf_counter
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -59,6 +60,7 @@ def evaluate(base_url, cases, timeout):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
+        started = perf_counter()
         try:
             with urlopen(request, timeout=timeout) as response:
                 answer = json.load(response).get("answer")
@@ -68,6 +70,7 @@ def evaluate(base_url, cases, timeout):
         except (HTTPError, URLError, TimeoutError, OSError, ValueError, AttributeError):
             # Keep provider diagnostics and answer text out of the evaluation report.
             result = {"id": case["id"], "passed": False, "reason": "request_failed"}
+        result["latency_ms"] = round((perf_counter() - started) * 1000, 3)
         results.append(result)
     return results
 

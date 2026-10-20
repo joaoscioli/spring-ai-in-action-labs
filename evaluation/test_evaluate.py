@@ -14,6 +14,18 @@ from evaluate import evaluate, main, passes
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.perf_counter", side_effect=[10.0, 10.125, 20.0, 20.25])
+    @patch("evaluate.urlopen")
+    def test_latency_is_recorded_for_success_and_transport_failure_without_answer_text(self, open_url, clock):
+        open_url.side_effect = [BytesIO(b'{"answer":"Diagonally."}'), URLError("private diagnostic")]
+        case = {"id": "first", "question": "How does a bishop move?", "required_patterns": ["Diagonal"]}
+        results = evaluate("http://localhost:8080", [case, dict(case, id="second")], 2)
+        self.assertEqual([125.0, 250.0], [item["latency_ms"] for item in results])
+        self.assertEqual(["matched", "request_failed"], [item["reason"] for item in results])
+        self.assertNotIn("Diagonally", json.dumps(results))
+        self.assertNotIn("private diagnostic", json.dumps(results))
+        self.assertEqual(4, clock.call_count)
+
     @patch("evaluate.urlopen")
     def test_forbidden_pattern_fails_even_when_all_required_patterns_match(self, open_url):
         case = {"id": "bishop", "question": "How does a bishop move?",
@@ -83,8 +95,10 @@ class EvaluationTests(unittest.TestCase):
         cases = [{"id": "boundary", "question": "x" * 500,
                   "required_patterns": ["(?i)diagonal", "board"]}]
         open_url.return_value = BytesIO(b'{"answer":"Diagonally across the board."}')
-        self.assertEqual([{"id": "boundary", "passed": True, "reason": "matched"}],
-                         evaluate("http://localhost:8080", cases, 2))
+        results = evaluate("http://localhost:8080", cases, 2)
+        self.assertEqual({"id": "boundary", "passed": True, "reason": "matched"},
+                         {key: value for key, value in results[0].items() if key != "latency_ms"})
+        self.assertGreaterEqual(results[0]["latency_ms"], 0)
         self.assertEqual(1, open_url.call_count)
 
     @patch("evaluate.urlopen")
