@@ -75,6 +75,15 @@ def evaluate(base_url, cases, timeout):
     return results
 
 
+def summarize_latency(results):
+    """Aggregate all cases, including failures; p95 uses the nearest-rank rule."""
+    values = sorted(item["latency_ms"] for item in results)
+    if not values:
+        return {"count": 0, "mean_ms": None, "p95_ms": None, "max_ms": None}
+    return {"count": len(values), "mean_ms": round(sum(values) / len(values), 3),
+            "p95_ms": values[math.ceil(0.95 * len(values)) - 1], "max_ms": values[-1]}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://localhost:8080")
@@ -87,7 +96,8 @@ def main():
         results = evaluate(args.base_url, cases, args.timeout)
     except ValueError as error:
         parser.error(str(error))
-    print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results)}, indent=2))
+    print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results),
+                      "latency": summarize_latency(results)}, indent=2))
     return 0 if all(item["passed"] for item in results) else 1
 
 

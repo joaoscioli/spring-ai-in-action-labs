@@ -186,7 +186,7 @@ before interpreting the score as model quality.
 Start `board-game-buddy` with your provider credentials, then run
 `python evaluation/evaluate.py --base-url http://localhost:8080` from this repository.
 This makes three real `/ask` requests and may incur provider charges. It prints
-case IDs, pass/fail reasons, per-case `latency_ms` and a total, returning exit code 1 if any case fails.
+case IDs, pass/fail reasons, per-case `latency_ms`, aggregate `latency` and a pass total, returning exit code 1 if any case fails.
 Latency uses a monotonic clock and includes the HTTP request, response decoding
 and rubric scoring, including failed requests. Application provider retries are
 included in this elapsed time; it is not a measure of provider processing alone.
@@ -205,6 +205,11 @@ evaluator with canned responses and transport failures, without provider calls.
 CI runs these offline tests, including local HTTP checks of command exit codes.
 
 The evaluator validates the complete case dataset before making any HTTP request: a nonempty list, unique nonblank IDs, nonblank questions up to 500 characters, and nonempty lists of valid, nonblank regex patterns. Invalid datasets raise `ValueError` in the API and exit 2 as CLI usage errors; they cannot produce an empty successful report or consume provider calls before a later invalid case is found.
+
+The `latency` summary includes successful and failed cases: count, mean, maximum,
+and nearest-rank p95 (`ceil(0.95 * count)`). With small datasets p95 often equals
+the maximum; use larger repeated runs for performance conclusions. Empty API
+summaries return null metrics.
 
 ## Interview Talking Points
 

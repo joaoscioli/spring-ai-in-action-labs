@@ -10,10 +10,21 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import URLError
 
-from evaluate import evaluate, main, passes
+from evaluate import evaluate, main, passes, summarize_latency
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_latency_summary_includes_failures_and_uses_nearest_rank_without_mutation(self):
+        results = [{"latency_ms": value, "passed": value != 20} for value in range(20, 0, -1)]
+        before = json.dumps(results)
+        self.assertEqual({"count": 20, "mean_ms": 10.5, "p95_ms": 19, "max_ms": 20},
+                         summarize_latency(results))
+        self.assertEqual(before, json.dumps(results))
+        self.assertEqual({"count": 1, "mean_ms": 0.125, "p95_ms": 0.125, "max_ms": 0.125},
+                         summarize_latency([{"latency_ms": 0.125}]))
+        self.assertEqual({"count": 0, "mean_ms": None, "p95_ms": None, "max_ms": None},
+                         summarize_latency([]))
+
     @patch("evaluate.perf_counter", side_effect=[10.0, 10.125, 20.0, 20.25])
     @patch("evaluate.urlopen")
     def test_latency_is_recorded_for_success_and_transport_failure_without_answer_text(self, open_url, clock):
@@ -188,6 +199,8 @@ class EvaluationTests(unittest.TestCase):
             good = subprocess.run(command, capture_output=True, text=True, timeout=10)
             self.assertEqual(0, good.returncode, good.stderr)
             self.assertEqual(3, json.loads(good.stdout)["passed"])
+            self.assertEqual(summarize_latency(json.loads(good.stdout)["cases"]),
+                             json.loads(good.stdout)["latency"])
 
             answers[self.cases[0]["question"]] = "I couldn't generate an answer. Please try again."
             bad = subprocess.run(command, capture_output=True, text=True, timeout=10)
