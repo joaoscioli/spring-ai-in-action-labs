@@ -29,6 +29,10 @@ def validate_cases(cases):
         if not isinstance(case_id, str) or not case_id.strip() or case_id in seen:
             raise ValueError(prefix + "id must be a unique nonblank string")
         seen.add(case_id)
+        limit = case.get("max_latency_ms")
+        if "max_latency_ms" in case and (isinstance(limit, bool) or not isinstance(limit, (int, float))
+                                         or not math.isfinite(limit) or limit <= 0):
+            raise ValueError(prefix + "max_latency_ms must be finite and greater than zero")
         question = case.get("question")
         if not isinstance(question, str) or not question.strip() or len(question) > 500:
             raise ValueError(prefix + "question must contain 1-500 characters and not be blank")
@@ -70,7 +74,10 @@ def evaluate(base_url, cases, timeout):
         except (HTTPError, URLError, TimeoutError, OSError, ValueError, AttributeError):
             # Keep provider diagnostics and answer text out of the evaluation report.
             result = {"id": case["id"], "passed": False, "reason": "request_failed"}
-        result["latency_ms"] = round((perf_counter() - started) * 1000, 3)
+        elapsed_ms = (perf_counter() - started) * 1000
+        result["latency_ms"] = round(elapsed_ms, 3)
+        if result["passed"] and elapsed_ms > case.get("max_latency_ms", math.inf):
+            result.update(passed=False, reason="latency_exceeded")
         results.append(result)
     return results
 

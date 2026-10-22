@@ -176,6 +176,14 @@ stakeholder value.
 
 ## Opt-in answer evaluation
 
+Each case can optionally set a positive, finite `max_latency_ms` budget, for
+example `"max_latency_ms": 2000`. A correct answer exceeding that budget fails
+with `latency_exceeded`; request failures and rubric mismatches keep their own
+reasons. Omit the field to score only answer quality. The budget uses unrounded
+elapsed time, including application retries, and does not interrupt requests;
+`--timeout` remains the HTTP timeout. Invalid budgets reject the entire dataset
+before any requests. Local timing is a regression signal, not a production SLO.
+
 Cases may include an optional `forbidden_patterns` regex list (empty by default).
 Every required pattern must match and no forbidden pattern may match. The bishop
 case rejects answers that also claim horizontal or vertical movement. All regexes

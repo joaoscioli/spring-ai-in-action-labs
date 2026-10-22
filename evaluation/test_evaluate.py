@@ -3,7 +3,7 @@ import unittest
 import subprocess
 import sys
 import threading
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -14,6 +14,51 @@ from evaluate import evaluate, main, passes, summarize_latency
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_optional_latency_budget_requires_correct_and_timely_answers(self, open_url):
+        case = {"id": "bishop", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"], "max_latency_ms": 125}
+        for answer, elapsed, reason in (("Diagonally.", .125, "matched"),
+                                        ("Diagonally.", .1250001, "latency_exceeded"),
+                                        ("Diagonally.", .25, "latency_exceeded"),
+                                        ("Horizontally.", .25, "rubric_mismatch")):
+            with self.subTest(answer=answer, elapsed=elapsed):
+                open_url.return_value = BytesIO(json.dumps({"answer": answer}).encode())
+                with patch("evaluate.perf_counter", side_effect=[0, elapsed]):
+                    result = evaluate("http://localhost:8080", [case], 2)[0]
+                self.assertEqual(reason, result["reason"])
+                self.assertEqual(reason == "matched", result["passed"])
+                self.assertEqual(round(elapsed * 1000, 3), result["latency_ms"])
+                self.assertNotIn(answer, json.dumps(result))
+        open_url.side_effect = URLError("private diagnostic")
+        with patch("evaluate.perf_counter", side_effect=[0, .25]):
+            self.assertEqual("request_failed", evaluate("http://localhost:8080", [case], 2)[0]["reason"])
+
+    @patch("evaluate.urlopen")
+    def test_cli_returns_failure_for_correct_answer_over_latency_budget(self, open_url):
+        case = {"id": "bishop", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"], "max_latency_ms": 125}
+        output = StringIO()
+        open_url.return_value = BytesIO(b'{"answer":"Diagonally."}')
+        with patch.object(sys, "argv", ["evaluate.py"]), \
+                patch("evaluate.Path.read_text", return_value=json.dumps([case])), \
+                patch("evaluate.perf_counter", side_effect=[0, .25]), \
+                redirect_stdout(output):
+            self.assertEqual(1, main())
+        report = json.loads(output.getvalue())
+        self.assertEqual(0, report["passed"])
+        self.assertEqual("latency_exceeded", report["cases"][0]["reason"])
+        self.assertEqual(250, report["latency"]["max_ms"])
+        open_url.assert_called_once()
+
+    @patch("evaluate.urlopen")
+    def test_invalid_latency_budget_in_later_case_prevents_all_requests(self, open_url):
+        valid = {"id": "first", "question": "How does a bishop move?", "required_patterns": ["diagonal"]}
+        for limit in (None, True, False, "125", 0, -1, float("nan"), float("inf")):
+            with self.subTest(limit=limit), self.assertRaisesRegex(ValueError, "max_latency_ms"):
+                evaluate("http://localhost:8080", [valid, dict(valid, id="second", max_latency_ms=limit)], 2)
+        open_url.assert_not_called()
+
     def test_latency_summary_includes_failures_and_uses_nearest_rank_without_mutation(self):
         results = [{"latency_ms": value, "passed": value != 20} for value in range(20, 0, -1)]
         before = json.dumps(results)
