@@ -5,6 +5,7 @@ import json
 import math
 import re
 import sys
+from http.client import HTTPException
 from time import perf_counter
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -71,7 +72,7 @@ def evaluate(base_url, cases, timeout):
             passed = passes(case, answer)
             result = {"id": case["id"], "passed": passed,
                       "reason": "matched" if passed else "rubric_mismatch"}
-        except (HTTPError, URLError, TimeoutError, OSError, ValueError, AttributeError):
+        except (HTTPError, URLError, HTTPException, TimeoutError, OSError, ValueError, AttributeError):
             # Keep provider diagnostics and answer text out of the evaluation report.
             result = {"id": case["id"], "passed": False, "reason": "request_failed"}
         elapsed_ms = (perf_counter() - started) * 1000

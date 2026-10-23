@@ -4,6 +4,7 @@ import subprocess
 import sys
 import threading
 from contextlib import redirect_stderr, redirect_stdout
+from http.client import IncompleteRead
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -14,6 +15,24 @@ from evaluate import evaluate, main, passes, summarize_latency
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.perf_counter", side_effect=[0, .125, 1, 1.25])
+    @patch("evaluate.urlopen")
+    def test_truncated_http_response_is_reported_and_later_cases_still_run(self, open_url, clock):
+        case = {"id": "truncated", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"]}
+        class TruncatedResponse(BytesIO):
+            def read(self, *args):
+                raise IncompleteRead(b"private partial provider response", 100)
+        open_url.side_effect = [TruncatedResponse(), BytesIO(b'{"answer":"Diagonally."}')]
+
+        results = evaluate("http://localhost:8080", [case, dict(case, id="healthy")], 2)
+
+        self.assertEqual([{"id": "truncated", "passed": False, "reason": "request_failed", "latency_ms": 125},
+                          {"id": "healthy", "passed": True, "reason": "matched", "latency_ms": 250}], results)
+        self.assertEqual(2, open_url.call_count)
+        self.assertEqual(4, clock.call_count)
+        self.assertNotIn("private", json.dumps(results))
+
     @patch("evaluate.urlopen")
     def test_optional_latency_budget_requires_correct_and_timely_answers(self, open_url):
         case = {"id": "bishop", "question": "How does a bishop move?",
