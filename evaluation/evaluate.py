@@ -72,7 +72,10 @@ def evaluate(base_url, cases, timeout):
             passed = passes(case, answer)
             result = {"id": case["id"], "passed": passed,
                       "reason": "matched" if passed else "rubric_mismatch"}
-        except (HTTPError, URLError, HTTPException, TimeoutError, OSError, ValueError, AttributeError):
+        except (HTTPError, URLError, HTTPException, TimeoutError, OSError, ValueError, AttributeError) as error:
+            # HTTPError owns the response stream even though urlopen never entered the context.
+            if isinstance(error, HTTPError):
+                error.close()
             # Keep provider diagnostics and answer text out of the evaluation report.
             result = {"id": case["id"], "passed": False, "reason": "request_failed"}
         elapsed_ms = (perf_counter() - started) * 1000

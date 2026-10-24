@@ -9,12 +9,38 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from io import BytesIO, StringIO
 from pathlib import Path
 from unittest.mock import patch
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
 
 from evaluate import evaluate, main, passes, summarize_latency
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.perf_counter", side_effect=[0, .125, 1, 1.25])
+    @patch("evaluate.urlopen")
+    def test_http_error_closes_response_without_reading_diagnostics_and_continues(self, open_url, clock):
+        class PrivateResponse(BytesIO):
+            def read(self, *args):
+                self.fail_if_read = True
+                raise AssertionError("error response body must not be read")
+
+        body = PrivateResponse(b"private provider diagnostics")
+        failure = HTTPError("http://localhost:8080/ask", 429, "private status", {}, body)
+        healthy = BytesIO(b'{"answer":"Diagonally."}')
+        open_url.side_effect = [failure, healthy]
+        case = {"id": "limited", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"]}
+
+        results = evaluate("http://localhost:8080", [case, dict(case, id="healthy")], 2)
+
+        self.assertTrue(body.closed)
+        self.assertTrue(healthy.closed)
+        self.assertFalse(hasattr(body, "fail_if_read"))
+        self.assertEqual(["request_failed", "matched"], [item["reason"] for item in results])
+        self.assertEqual([False, True], [item["passed"] for item in results])
+        self.assertEqual([125, 250], [item["latency_ms"] for item in results])
+        self.assertNotIn("private", json.dumps(results))
+        self.assertEqual(2, open_url.call_count)
+
     @patch("evaluate.perf_counter", side_effect=[0, .125, 1, 1.25])
     @patch("evaluate.urlopen")
     def test_truncated_http_response_is_reported_and_later_cases_still_run(self, open_url, clock):
