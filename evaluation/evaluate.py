@@ -12,6 +12,9 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
+MAX_RESPONSE_BYTES = 1024 * 1024
+
+
 def passes(case, answer):
     return isinstance(answer, str) and all(
         re.search(pattern, answer) for pattern in case["required_patterns"]
@@ -68,7 +71,10 @@ def evaluate(base_url, cases, timeout):
         started = perf_counter()
         try:
             with urlopen(request, timeout=timeout) as response:
-                answer = json.load(response).get("answer")
+                body = response.read(MAX_RESPONSE_BYTES + 1)
+                if len(body) > MAX_RESPONSE_BYTES:
+                    raise ValueError("response exceeds evaluation size limit")
+                answer = json.loads(body).get("answer")
             passed = passes(case, answer)
             result = {"id": case["id"], "passed": passed,
                       "reason": "matched" if passed else "rubric_mismatch"}

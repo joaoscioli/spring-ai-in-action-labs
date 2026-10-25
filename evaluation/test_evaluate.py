@@ -11,10 +11,34 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
-from evaluate import evaluate, main, passes, summarize_latency
+from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_latency
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_response_size_boundary_is_bounded_closed_and_does_not_stop_later_cases(self, open_url):
+        case = {"id": "boundary", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"]}
+        prefix = b'{"answer":"Diagonally.","padding":"'
+        suffix = b'"}'
+        boundary = prefix + b'x' * (MAX_RESPONSE_BYTES - len(prefix) - len(suffix)) + suffix
+        class BoundedResponse(BytesIO):
+            def read(self, size=-1):
+                if size != MAX_RESPONSE_BYTES + 1:
+                    raise AssertionError("response must use a bounded read")
+                return super().read(size)
+        streams = [BoundedResponse(boundary), BoundedResponse(boundary + b' '),
+                   BoundedResponse(b'{"answer":"Diagonally."}')]
+        open_url.side_effect = streams
+
+        results = evaluate("http://localhost:8080", [case, dict(case, id="oversized"),
+                                                   dict(case, id="healthy")], 2)
+
+        self.assertEqual(["matched", "request_failed", "matched"], [r["reason"] for r in results])
+        self.assertTrue(all(stream.closed for stream in streams))
+        self.assertEqual(3, open_url.call_count)
+        self.assertNotIn("padding", json.dumps(results))
+
     @patch("evaluate.perf_counter", side_effect=[0, .125, 1, 1.25])
     @patch("evaluate.urlopen")
     def test_http_error_closes_response_without_reading_diagnostics_and_continues(self, open_url, clock):
