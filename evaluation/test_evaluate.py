@@ -16,6 +16,23 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_invalid_utf8_response_is_closed_sanitized_and_does_not_stop_next_case(self, open_url):
+        case = {"id": "encoding", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"]}
+        invalid = BytesIO(b'{"answer":"private-provider-\xff"}')
+        healthy = BytesIO(b'{"answer":"Diagonally."}')
+        open_url.side_effect = [invalid, healthy]
+
+        results = evaluate("http://localhost:8080", [case, dict(case, id="healthy")], 2)
+
+        self.assertEqual(["request_failed", "matched"], [r["reason"] for r in results])
+        self.assertEqual([False, True], [r["passed"] for r in results])
+        self.assertTrue(invalid.closed)
+        self.assertTrue(healthy.closed)
+        self.assertEqual(2, open_url.call_count)
+        self.assertNotIn("private-provider", json.dumps(results))
+
+    @patch("evaluate.urlopen")
     def test_response_size_boundary_is_bounded_closed_and_does_not_stop_later_cases(self, open_url):
         case = {"id": "boundary", "question": "How does a bishop move?",
                 "required_patterns": ["Diagonal"]}
