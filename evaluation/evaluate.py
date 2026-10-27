@@ -104,14 +104,16 @@ def summarize_latency(results):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://localhost:8080")
+    parser.add_argument("--cases", type=Path, default=Path(__file__).with_name("cases.json"),
+                        help="JSON evaluation dataset (defaults to the bundled cases.json)")
     parser.add_argument("--timeout", type=float, default=30)
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or args.timeout <= 0:
         parser.error("--timeout must be finite and greater than zero")
     try:
-        cases = json.loads(Path(__file__).with_name("cases.json").read_text(encoding="utf-8"))
+        cases = json.loads(args.cases.read_text(encoding="utf-8"))
         results = evaluate(args.base_url, cases, args.timeout)
-    except ValueError as error:
+    except (ValueError, OSError) as error:
         parser.error(str(error))
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results),
                       "latency": summarize_latency(results)}, indent=2))

@@ -3,6 +3,7 @@ import unittest
 import subprocess
 import sys
 import threading
+import tempfile
 from contextlib import redirect_stderr, redirect_stdout
 from http.client import IncompleteRead
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,6 +16,35 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_cli_uses_custom_dataset_and_validates_before_requests(self, open_url):
+        case = {"id": "custom", "question": "How does a bishop move?",
+                "required_patterns": ["Diagonal"]}
+        with tempfile.TemporaryDirectory() as temporary:
+            dataset = Path(temporary) / "custom cases.json"
+            for contents, expected in ((json.dumps([case]), 0), ("[]", 2), ("{invalid", 2)):
+                with self.subTest(contents=contents):
+                    dataset.write_text(contents, encoding="utf-8")
+                    open_url.reset_mock()
+                    open_url.return_value = BytesIO(b'{"answer":"Diagonally."}')
+                    output = StringIO()
+                    with patch.object(sys, "argv", ["evaluate.py", "--cases", str(dataset)]), \
+                            redirect_stdout(output), redirect_stderr(StringIO()):
+                        if expected == 0:
+                            self.assertEqual(0, main())
+                            self.assertEqual("custom", json.loads(output.getvalue())["cases"][0]["id"])
+                            open_url.assert_called_once()
+                        else:
+                            with self.assertRaises(SystemExit) as failure:
+                                main()
+                            self.assertEqual(expected, failure.exception.code)
+                            open_url.assert_not_called()
+            with patch.object(sys, "argv", ["evaluate.py", "--cases", str(dataset.parent / "missing.json")]), \
+                    redirect_stderr(StringIO()), self.assertRaises(SystemExit) as failure:
+                main()
+            self.assertEqual(2, failure.exception.code)
+            open_url.assert_not_called()
+
     @patch("evaluate.urlopen")
     def test_invalid_utf8_response_is_closed_sanitized_and_does_not_stop_next_case(self, open_url):
         case = {"id": "encoding", "question": "How does a bishop move?",
