@@ -55,13 +55,15 @@ def validate_cases(cases):
                 raise ValueError(prefix + "pattern must be a valid regular expression") from None
 
 
-def evaluate(base_url, cases, timeout):
+def evaluate(base_url, cases, timeout, repetitions=1):
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError("timeout must be finite and greater than zero")
+    if isinstance(repetitions, bool) or not isinstance(repetitions, int) or repetitions < 1:
+        raise ValueError("repetitions must be a positive integer")
     # Validate the entire dataset before the first potentially billable request.
     validate_cases(cases)
     results = []
-    for case in cases:
+    for attempt, case in ((attempt, case) for attempt in range(1, repetitions + 1) for case in cases):
         request = Request(
             base_url.rstrip("/") + "/ask",
             data=json.dumps({"question": case["question"]}).encode("utf-8"),
@@ -88,6 +90,8 @@ def evaluate(base_url, cases, timeout):
         result["latency_ms"] = round(elapsed_ms, 3)
         if result["passed"] and elapsed_ms > case.get("max_latency_ms", math.inf):
             result.update(passed=False, reason="latency_exceeded")
+        if repetitions > 1:
+            result["attempt"] = attempt
         results.append(result)
     return results
 
@@ -106,13 +110,14 @@ def main():
     parser.add_argument("--base-url", default="http://localhost:8080")
     parser.add_argument("--cases", type=Path, default=Path(__file__).with_name("cases.json"),
                         help="JSON evaluation dataset (defaults to the bundled cases.json)")
+    parser.add_argument("--repeat", type=int, default=1, help="number of complete dataset passes")
     parser.add_argument("--timeout", type=float, default=30)
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or args.timeout <= 0:
         parser.error("--timeout must be finite and greater than zero")
     try:
         cases = json.loads(args.cases.read_text(encoding="utf-8"))
-        results = evaluate(args.base_url, cases, args.timeout)
+        results = evaluate(args.base_url, cases, args.timeout, args.repeat)
     except (ValueError, OSError) as error:
         parser.error(str(error))
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results),

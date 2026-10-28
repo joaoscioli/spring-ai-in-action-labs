@@ -17,6 +17,42 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_repeated_dataset_passes_expose_variability_and_continue_after_failures(self, open_url):
+        cases = [{"id": name, "question": "How does a bishop move?", "required_patterns": ["Diagonal"]}
+                 for name in ("first", "second")]
+        open_url.side_effect = [BytesIO(b'{"answer":"Diagonally."}'), URLError("private failure"),
+                               BytesIO(b'{"answer":"Wrong."}'), BytesIO(b'{"answer":"Diagonally."}')]
+        with patch("evaluate.perf_counter", side_effect=[0, .1, 1, 1.2, 2, 2.3, 3, 3.4]):
+            results = evaluate("http://localhost:8080", cases, 2, repetitions=2)
+        self.assertEqual([("first", 1), ("second", 1), ("first", 2), ("second", 2)],
+                         [(r["id"], r["attempt"]) for r in results])
+        self.assertEqual(["matched", "request_failed", "rubric_mismatch", "matched"],
+                         [r["reason"] for r in results])
+        self.assertEqual(4, open_url.call_count)
+        self.assertEqual(4, summarize_latency(results)["count"])
+        self.assertNotIn("private", json.dumps(results))
+
+    @patch("evaluate.urlopen")
+    def test_invalid_repetition_counts_prevent_requests(self, open_url):
+        for repetitions in (0, -1, True, 1.5, "2"):
+            with self.subTest(repetitions=repetitions), self.assertRaisesRegex(ValueError, "positive integer"):
+                evaluate("http://localhost:8080", self.cases, 2, repetitions)
+        open_url.assert_not_called()
+
+    @patch("evaluate.urlopen")
+    def test_cli_repeat_reports_every_attempt_and_fails_if_any_attempt_fails(self, open_url):
+        case = {"id": "bishop", "question": "How does a bishop move?", "required_patterns": ["Diagonal"]}
+        open_url.side_effect = [BytesIO(b'{"answer":"Diagonally."}'), BytesIO(b'{"answer":"Wrong."}')]
+        output = StringIO()
+        with patch.object(sys, "argv", ["evaluate.py", "--repeat", "2"]), \
+                patch("evaluate.Path.read_text", return_value=json.dumps([case])), redirect_stdout(output):
+            self.assertEqual(1, main())
+        report = json.loads(output.getvalue())
+        self.assertEqual(1, report["passed"])
+        self.assertEqual([1, 2], [r["attempt"] for r in report["cases"]])
+        self.assertEqual(2, report["latency"]["count"])
+
+    @patch("evaluate.urlopen")
     def test_cli_uses_custom_dataset_and_validates_before_requests(self, open_url):
         case = {"id": "custom", "question": "How does a bishop move?",
                 "required_patterns": ["Diagonal"]}
