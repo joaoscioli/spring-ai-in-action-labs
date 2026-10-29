@@ -105,6 +105,18 @@ def summarize_latency(results):
             "p95_ms": values[math.ceil(0.95 * len(values)) - 1], "max_ms": values[-1]}
 
 
+def summarize_cases(results):
+    """Show variability per dataset ID, preserving first appearance order."""
+    grouped = {}
+    for result in results:
+        grouped.setdefault(result["id"], []).append(result)
+    return [{"id": case_id, "attempts": len(attempts),
+             "passed": sum(item["passed"] for item in attempts),
+             "pass_rate": sum(item["passed"] for item in attempts) / len(attempts),
+             "latency": summarize_latency(attempts)}
+            for case_id, attempts in grouped.items()]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://localhost:8080")
@@ -121,7 +133,7 @@ def main():
     except (ValueError, OSError) as error:
         parser.error(str(error))
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results),
-                      "latency": summarize_latency(results)}, indent=2))
+                      "latency": summarize_latency(results), "case_summary": summarize_cases(results)}, indent=2))
     return 0 if all(item["passed"] for item in results) else 1
 
 

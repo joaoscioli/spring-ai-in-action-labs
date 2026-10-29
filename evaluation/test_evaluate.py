@@ -12,10 +12,25 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
-from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_latency
+from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_latency, summarize_cases
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_case_summary_groups_interleaved_attempts_and_includes_failed_latency(self):
+        results = [{"id": "second", "passed": True, "latency_ms": 10},
+                   {"id": "first", "passed": False, "latency_ms": 100},
+                   {"id": "second", "passed": False, "latency_ms": 30},
+                   {"id": "first", "passed": False, "latency_ms": 200}]
+        before = json.dumps(results)
+        self.assertEqual([
+            {"id": "second", "attempts": 2, "passed": 1, "pass_rate": 0.5,
+             "latency": {"count": 2, "mean_ms": 20, "p95_ms": 30, "max_ms": 30}},
+            {"id": "first", "attempts": 2, "passed": 0, "pass_rate": 0,
+             "latency": {"count": 2, "mean_ms": 150, "p95_ms": 200, "max_ms": 200}}
+        ], summarize_cases(results))
+        self.assertEqual(before, json.dumps(results))
+        self.assertEqual([], summarize_cases([]))
+
     @patch("evaluate.urlopen")
     def test_repeated_dataset_passes_expose_variability_and_continue_after_failures(self, open_url):
         cases = [{"id": name, "question": "How does a bishop move?", "required_patterns": ["Diagonal"]}
@@ -51,6 +66,8 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(1, report["passed"])
         self.assertEqual([1, 2], [r["attempt"] for r in report["cases"]])
         self.assertEqual(2, report["latency"]["count"])
+        self.assertEqual([{"id": "bishop", "attempts": 2, "passed": 1, "pass_rate": 0.5,
+                           "latency": report["latency"]}], report["case_summary"])
 
     @patch("evaluate.urlopen")
     def test_cli_uses_custom_dataset_and_validates_before_requests(self, open_url):

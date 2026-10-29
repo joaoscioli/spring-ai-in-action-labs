@@ -13,3 +13,9 @@ answer variability. Repeated results include a one-based `attempt`; latency and
 passed counts include every attempt, and any failure makes the command exit 1.
 The default is one pass. Each repetition sends new API requests and may incur
 provider charges; this is sampling, not an automatic retry policy.
+
+The JSON report also includes `case_summary`: one entry per dataset ID in dataset
+order, with attempt count, passed count, pass rate (0–1), and latency statistics
+including failed attempts. Use this to spot an unstable question hidden by the
+overall passed count. The detailed `cases` and strict any-failure exit code remain
+available; a high sampled pass rate does not guarantee future model behavior.
