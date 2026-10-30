@@ -117,6 +117,12 @@ def summarize_cases(results):
             for case_id, attempts in grouped.items()]
 
 
+def summarize_failures(results):
+    """Separate transport, answer-quality and latency failures without diagnostics."""
+    return {reason: sum(not item["passed"] and item["reason"] == reason for item in results)
+            for reason in ("request_failed", "rubric_mismatch", "latency_exceeded")}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://localhost:8080")
@@ -133,7 +139,8 @@ def main():
     except (ValueError, OSError) as error:
         parser.error(str(error))
     print(json.dumps({"cases": results, "passed": sum(item["passed"] for item in results),
-                      "latency": summarize_latency(results), "case_summary": summarize_cases(results)}, indent=2))
+                      "latency": summarize_latency(results), "case_summary": summarize_cases(results),
+                      "failure_counts": summarize_failures(results)}, indent=2))
     return 0 if all(item["passed"] for item in results) else 1
 
 

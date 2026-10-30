@@ -19,3 +19,9 @@ order, with attempt count, passed count, pass rate (0–1), and latency statisti
 including failed attempts. Use this to spot an unstable question hidden by the
 overall passed count. The detailed `cases` and strict any-failure exit code remain
 available; a high sampled pass rate does not guarantee future model behavior.
+
+The report's `failure_counts` separates `request_failed`, `rubric_mismatch` and
+`latency_exceeded`, including zero counts. Each failed attempt contributes once:
+an answer that misses the rubric remains a quality failure even when slow.
+Use these counts to distinguish availability, answer quality and response-time
+problems without including provider diagnostics or answer text in the report.

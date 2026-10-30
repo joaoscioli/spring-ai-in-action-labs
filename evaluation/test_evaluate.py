@@ -12,10 +12,33 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 
-from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_latency, summarize_cases
+from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_latency, summarize_cases, summarize_failures
 
 
 class EvaluationTests(unittest.TestCase):
+    @patch("evaluate.urlopen")
+    def test_cli_failure_counts_distinguish_transport_quality_and_latency(self, open_url):
+        cases = [{"id": str(index), "question": "How does a bishop move?",
+                  "required_patterns": ["Diagonal"], "max_latency_ms": 100}
+                 for index in range(5)]
+        open_url.side_effect = [URLError("private provider failure"), BytesIO(b'{"answer":"Wrong."}'),
+                               BytesIO(b'{"answer":"Diagonally."}'),
+                               BytesIO(b'{"answer":"Diagonally."}'), BytesIO(b'{"answer":"Wrong."}')]
+        output = StringIO()
+        with patch.object(sys, "argv", ["evaluate.py"]), \
+                patch("evaluate.Path.read_text", return_value=json.dumps(cases)), \
+                patch("evaluate.perf_counter", side_effect=[0, .01, 1, 1.01, 2, 2.2, 3, 3.01, 4, 4.2]), \
+                redirect_stdout(output):
+            self.assertEqual(1, main())
+        report = json.loads(output.getvalue())
+        self.assertEqual({"request_failed": 1, "rubric_mismatch": 2, "latency_exceeded": 1},
+                         report["failure_counts"])
+        self.assertEqual(1, report["passed"])
+        self.assertEqual(5, open_url.call_count)
+        self.assertNotIn("private", output.getvalue())
+        self.assertEqual({"request_failed": 0, "rubric_mismatch": 0, "latency_exceeded": 0},
+                         summarize_failures([]))
+
     def test_case_summary_groups_interleaved_attempts_and_includes_failed_latency(self):
         results = [{"id": "second", "passed": True, "latency_ms": 10},
                    {"id": "first", "passed": False, "latency_ms": 100},
