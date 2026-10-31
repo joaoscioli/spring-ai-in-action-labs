@@ -37,8 +37,9 @@ def validate_cases(cases):
         if "max_latency_ms" in case and (isinstance(limit, bool) or not isinstance(limit, (int, float))
                                          or not math.isfinite(limit) or limit <= 0):
             raise ValueError(prefix + "max_latency_ms must be finite and greater than zero")
+        # Match Java @Size: supplementary characters occupy two UTF-16 units.
         question = case.get("question")
-        if not isinstance(question, str) or not question.strip() or len(question) > 500:
+        if not isinstance(question, str) or not question.strip() or len(question.encode("utf-16-le", errors="surrogatepass")) // 2 > 500:
             raise ValueError(prefix + "question must contain 1-500 characters and not be blank")
         patterns = case.get("required_patterns")
         if not isinstance(patterns, list) or not patterns:

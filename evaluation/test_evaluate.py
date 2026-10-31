@@ -17,6 +17,19 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_question_limit_matches_java_utf16_units_before_any_request(self, open_url):
+        for question in ("x" * 501, "😀" * 250 + "x"):
+            cases = [{"id": "boundary", "question": question, "required_patterns": ["ok"]}]
+            with self.subTest(length=len(question)), self.assertRaisesRegex(ValueError, "1-500"):
+                evaluate("http://localhost:8080", cases, 2)
+        open_url.assert_not_called()
+        for question in ("x" * 500, "😀" * 250):
+            open_url.return_value = BytesIO(b'{"answer":"ok"}')
+            cases = [{"id": "boundary", "question": question, "required_patterns": ["ok"]}]
+            self.assertTrue(evaluate("http://localhost:8080", cases, 2)[0]["passed"])
+        self.assertEqual(2, open_url.call_count)
+
+    @patch("evaluate.urlopen")
     def test_cli_failure_counts_distinguish_transport_quality_and_latency(self, open_url):
         cases = [{"id": str(index), "question": "How does a bishop move?",
                   "required_patterns": ["Diagonal"], "max_latency_ms": 100}
