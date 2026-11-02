@@ -17,6 +17,21 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_invalid_base_urls_fail_before_requests_and_do_not_echo_credentials(self, open_url):
+        cases = [{"id": "one", "question": "Question?", "required_patterns": ["ok"]}]
+        for url in ("localhost:8080", "file:///private", "https:///ask", "http://host:bad",
+                    "http://host:70000", "http://host:0", "http://user:secret@host",
+                    "http://host?key=secret", "http://host#secret"):
+            with self.subTest(url=url), self.assertRaisesRegex(ValueError, "base URL") as failure:
+                evaluate(url, cases, 2)
+            self.assertNotIn("secret", str(failure.exception))
+        open_url.assert_not_called()
+        for url in ("http://localhost:8080/", "https://example.com/api", "http://[::1]:8080"):
+            open_url.return_value = BytesIO(b'{"answer":"ok"}')
+            self.assertTrue(evaluate(url, cases, 2)[0]["passed"])
+            self.assertEqual(url.rstrip("/") + "/ask", open_url.call_args.args[0].full_url)
+
+    @patch("evaluate.urlopen")
     def test_blank_answer_fails_even_with_permissive_rubric_and_later_case_continues(self, open_url):
         cases = [{"id": str(i), "question": "Question?", "required_patterns": [".*"]} for i in range(3)]
         open_url.side_effect = [BytesIO(json.dumps({"answer": answer}).encode()) for answer in ("", " \t", "Useful")]

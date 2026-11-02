@@ -9,6 +9,7 @@ from http.client import HTTPException
 from time import perf_counter
 from pathlib import Path
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 
@@ -56,12 +57,26 @@ def validate_cases(cases):
                 raise ValueError(prefix + "pattern must be a valid regular expression") from None
 
 
+def validate_base_url(base_url):
+    """Require an explicit HTTP endpoint before any potentially billable request."""
+    try:
+        url = urlsplit(base_url)
+        valid = (url.scheme in ("http", "https") and url.hostname and url.port != 0
+                 and url.username is None and url.password is None
+                 and not url.query and not url.fragment)
+    except (ValueError, TypeError, AttributeError):
+        valid = False
+    if not valid:
+        raise ValueError("base URL must be HTTP(S) with a host, valid port and no credentials, query or fragment")
+
+
 def evaluate(base_url, cases, timeout, repetitions=1):
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError("timeout must be finite and greater than zero")
     if isinstance(repetitions, bool) or not isinstance(repetitions, int) or repetitions < 1:
         raise ValueError("repetitions must be a positive integer")
     # Validate the entire dataset before the first potentially billable request.
+    validate_base_url(base_url)
     validate_cases(cases)
     results = []
     for attempt, case in ((attempt, case) for attempt in range(1, repetitions + 1) for case in cases):
