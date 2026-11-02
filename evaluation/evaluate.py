@@ -16,7 +16,7 @@ MAX_RESPONSE_BYTES = 1024 * 1024
 
 
 def passes(case, answer):
-    return isinstance(answer, str) and all(
+    return isinstance(answer, str) and bool(answer.strip()) and all(
         re.search(pattern, answer) for pattern in case["required_patterns"]
     ) and not any(re.search(pattern, answer) for pattern in case.get("forbidden_patterns", []))
 

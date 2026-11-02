@@ -17,6 +17,15 @@ from evaluate import MAX_RESPONSE_BYTES, evaluate, main, passes, summarize_laten
 
 class EvaluationTests(unittest.TestCase):
     @patch("evaluate.urlopen")
+    def test_blank_answer_fails_even_with_permissive_rubric_and_later_case_continues(self, open_url):
+        cases = [{"id": str(i), "question": "Question?", "required_patterns": [".*"]} for i in range(3)]
+        open_url.side_effect = [BytesIO(json.dumps({"answer": answer}).encode()) for answer in ("", " \t", "Useful")]
+        results = evaluate("http://localhost:8080", cases, 2)
+        self.assertEqual([False, False, True], [r["passed"] for r in results])
+        self.assertEqual(["rubric_mismatch", "rubric_mismatch", "matched"], [r["reason"] for r in results])
+        self.assertEqual(3, open_url.call_count)
+
+    @patch("evaluate.urlopen")
     def test_question_limit_matches_java_utf16_units_before_any_request(self, open_url):
         for question in ("x" * 501, "😀" * 250 + "x"):
             cases = [{"id": "boundary", "question": question, "required_patterns": ["ok"]}]
